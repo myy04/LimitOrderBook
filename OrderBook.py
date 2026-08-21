@@ -10,16 +10,24 @@ class OrderBook:
 
     def insert_order(self, order: Order):
         if order.side == OrderSide.BUY:
-            dll = self.__bids.get(order.price, default = DoublyLinkedList())
+            try: dll = self.__bids.get(order.price)
+            except: 
+                dll = DoublyLinkedList() 
+                self.__bids.update({order.price : dll})
         else:
-            dll = self.__asks.get(order.price, default = DoublyLinkedList())
+            try: dll = self.__asks.get(order.price)
+            except:
+                dll = DoublyLinkedList()
+                self.__asks.update({order.price : dll})
 
-        node = Node(data=Order)
+        node = Node(data=order)
         dll.append(node)
         self.__nodes.update({order.order_id : node})
 
     def remove_order(self, order: Order): 
-        node = self.__nodes.pop(order.order_id)
+        try: node = self.__nodes.pop(order.order_id)
+        except: return
+
         if order.side == OrderSide.BUY:
             dll = self.__bids.get(order.price)
         else:
@@ -29,4 +37,14 @@ class OrderBook:
         if len(dll) == 0:
             if order.side == OrderSide.BUY: self.__bids.pop(dll)
             else: self.__asks.pop(dll)
+
+    def peek_best_bid(self):
+        dll = self.__bids.peakitem(index = -1) 
+        front_node = dll.front()
+        return front_node.data
+
+    def peek_best_ask(self): 
+        dll = self.__asks.peakitem(index = 0)
+        front_node = dll.front()
+        return front_node.data
 
