@@ -39,12 +39,12 @@ class OrderBook:
             else: self.__asks.pop(dll)
 
     def peek_best_bid(self):
-        dll = self.__bids.peakitem(index = -1) 
+        dll = self.__bids.peekitem(index = -1) 
         front_node = dll.front()
         return front_node.data
 
     def peek_best_ask(self): 
-        dll = self.__asks.peakitem(index = 0)
+        dll = self.__asks.peekitem(index = 0)
         front_node = dll.front()
         return front_node.data
 
