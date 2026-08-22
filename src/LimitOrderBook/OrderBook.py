@@ -1,7 +1,7 @@
 from sortedcontainers import SortedDict
 
-from DataTypes import Order, Trade, OrderSide
-from DoublyLinkedList import Node, DoublyLinkedList
+from .DataTypes import Order, Trade, OrderSide
+from .DoublyLinkedList import Node, DoublyLinkedList
 
 class OrderBook:
     def __init__(self):

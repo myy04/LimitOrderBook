@@ -1,7 +1,7 @@
 from copy import copy
 
-from OrderBook import OrderBook
-from DataTypes import Order, Trade, OrderSide
+from .OrderBook import OrderBook
+from .DataTypes import Order, Trade, OrderSide
 
 
 class MatchingEngine:

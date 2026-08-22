@@ -1,8 +1,7 @@
 import pytest
 
-from MatchingEngine import MatchingEngine
-from DataTypes import Order, OrderSide
-
+from LimitOrderBook.MatchingEngine import MatchingEngine
+from LimitOrderBook.DataTypes import Order, OrderSide
 
 def make_order(side, price, volume, order_id, timestamp=0):
     return Order(side=side, price=price, volume=volume, order_id=order_id, timestamp=timestamp)
