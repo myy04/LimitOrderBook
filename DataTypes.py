@@ -16,7 +16,7 @@ class Order:
 
 @dataclass
 class Trade:
-    aggressor_order_id: int
-    resting_order_id: int
+    aggressor_order: Order
+    resting_order: Order
     price: int
     volume: int

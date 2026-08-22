@@ -1,10 +1,11 @@
-from DataTypes import Order, Trade, OrderSide
 from sortedcontainers import SortedDict
+
+from DataTypes import Order, Trade, OrderSide
 from DoublyLinkedList import Node, DoublyLinkedList
 
 class OrderBook:
     def __init__(self):
-        self.__bids = SortedDict()
+        self.__bids = SortedDict() 
         self.__asks = SortedDict()
         self.__nodes = {}
 
