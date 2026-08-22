@@ -8,7 +8,7 @@ class Node:
     _left: Node = None
     _right: Node = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.data)
 
 class DoublyLinkedList:
@@ -19,10 +19,10 @@ class DoublyLinkedList:
         self.__tail._left = self.__root
         self.__size = 0
 
-    def append(self, node: Node):
+    def append(self, node: Node) -> None:
         self.append_after(self.__tail._left, node) 
 
-    def append_after(self, old_node: Node, new_node: Node):
+    def append_after(self, old_node: Node, new_node: Node) -> None:
         new_node._right = old_node._right
         old_node._right._left = new_node
 
@@ -30,19 +30,19 @@ class DoublyLinkedList:
         new_node._left = old_node    
         self.__size += 1
 
-    def remove(self, node):
+    def remove(self, node) -> None:
         node._left._right = node._right
         node._right._left = node._left
         self.__size -= 1
     
-    def front(self): 
+    def front(self) -> None | Node:
         if self.__size == 0: return None
         return self.__root._right
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.__size
 
-    def __iter__(self):
+    def __iter__(self) -> Node:
         class iterable:
             def __init__(self, first, last): 
                 self.current_iter = first

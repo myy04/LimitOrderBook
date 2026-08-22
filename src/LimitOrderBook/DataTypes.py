@@ -12,8 +12,8 @@ class Order:
     price: int
     volume: int
     order_id: int
-    timestamp: int
-
+    timestamp: float
+    trader_id: str
 
 @dataclass
 class Trade:
@@ -21,3 +21,15 @@ class Trade:
     resting_order: Order
     price: int
     volume: int
+
+@dataclass
+class SelfTradeCancellation:
+    aggressor_order: Order
+    resting_order: Order
+    price: int
+    volume: int
+
+@dataclass
+class MatchResult:
+    trades: list[Trade]
+    cancellations: list[SelfTradeCancellation]

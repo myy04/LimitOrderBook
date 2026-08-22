@@ -3,7 +3,7 @@ import time
 from decimal import Decimal
 
 from .MatchingEngine import MatchingEngine
-from .DataTypes import Order, Trade, OrderSide
+from .DataTypes import *
 
 class OrderException(Exception):
     def __init__(self):
@@ -38,12 +38,12 @@ class OrderGateway:
         self.__MIN_VOLUME: int = 1
         self.__MAX_VOLUME: int = int(1e9)
 
-    def submit_order(self, side: int, price: float, volume: int) -> list[Trade]:
-        order = self.__construct_order(side, price, volume) 
+    def submit_order(self, trader_id: str, side: int, price: float, volume: int) -> MatchResult:
+        order = self.__construct_order(trader_id=trader_id, side=side, price=price, volume=volume) 
         return self.engine.handle_order(order)
 
 
-    def __construct_order(self, side: str, price: float, volume: int) -> Order: 
+    def __construct_order(self, trader_id: str, side: str, price: float, volume: int) -> Order: 
         if side != "BUY" and side != "SELL": raise SideException()
         side = OrderSide.BUY if side == "BUY" else OrderSide.SELL
 
@@ -58,5 +58,5 @@ class OrderGateway:
         order_id = self.__order_counter + 1
         self.__order_counter += 1
 
-        order = Order(side = side, price = price, volume = volume, order_id = order_id, timestamp = time.time())
+        order = Order(trader_id = trader_id, side = side, price = price, volume = volume, order_id = order_id, timestamp = time.time())
         return order

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sortedcontainers import SortedDict
 
 from .DataTypes import Order, Trade, OrderSide
@@ -9,7 +11,7 @@ class OrderBook:
         self.__asks = SortedDict()
         self.__nodes = {}
 
-    def insert_order(self, order: Order):
+    def insert_order(self, order: Order) -> None:
         if order.side == OrderSide.BUY:
             try: dll = self.__bids[order.price]
             except: 
@@ -25,7 +27,7 @@ class OrderBook:
         dll.append(node)
         self.__nodes.update({order.order_id : node})
 
-    def remove_order(self, order: Order): 
+    def remove_order(self, order: Order) -> None:
         try:
             node = self.__nodes.pop(order.order_id)
             if order.side == OrderSide.BUY:
@@ -40,7 +42,7 @@ class OrderBook:
             if order.side == OrderSide.BUY: self.__bids.pop(order.price)
             else: self.__asks.pop(order.price)
 
-    def peek_best_bid(self):
+    def peek_best_bid(self) -> Any:
         try:
             dll = self.__bids.peekitem(index = -1)[1]
             front_node = dll.front()
@@ -48,7 +50,7 @@ class OrderBook:
         except:
             return None
 
-    def peek_best_ask(self): 
+    def peek_best_ask(self) -> Any: 
         try:
             dll = self.__asks.peekitem(index = 0)[1]
             front_node = dll.front()
