@@ -10,12 +10,12 @@ class OrderBook:
 
     def insert_order(self, order: Order):
         if order.side == OrderSide.BUY:
-            try: dll = self.__bids.get(order.price)
+            try: dll = self.__bids[order.price]
             except: 
                 dll = DoublyLinkedList() 
                 self.__bids.update({order.price : dll})
         else:
-            try: dll = self.__asks.get(order.price)
+            try: dll = self.__asks[order.price]
             except:
                 dll = DoublyLinkedList()
                 self.__asks.update({order.price : dll})
@@ -25,26 +25,33 @@ class OrderBook:
         self.__nodes.update({order.order_id : node})
 
     def remove_order(self, order: Order): 
-        try: node = self.__nodes.pop(order.order_id)
-        except: return
+        try:
+            node = self.__nodes.pop(order.order_id)
+            if order.side == OrderSide.BUY:
+                dll = self.__bids[order.price]
+            else:
+                dll = self.__asks[order.price]
+        except:
+            return
 
-        if order.side == OrderSide.BUY:
-            dll = self.__bids.get(order.price)
-        else:
-            dll = self.__asks.get(order.price)
-        
         dll.remove(node)
         if len(dll) == 0:
-            if order.side == OrderSide.BUY: self.__bids.pop(dll)
-            else: self.__asks.pop(dll)
+            if order.side == OrderSide.BUY: self.__bids.pop(order.price)
+            else: self.__asks.pop(order.price)
 
     def peek_best_bid(self):
-        dll = self.__bids.peekitem(index = -1) 
-        front_node = dll.front()
-        return front_node.data
+        try:
+            dll = self.__bids.peekitem(index = -1)[1]
+            front_node = dll.front()
+            return front_node.data
+        except:
+            return None
 
     def peek_best_ask(self): 
-        dll = self.__asks.peekitem(index = 0)
-        front_node = dll.front()
-        return front_node.data
+        try:
+            dll = self.__asks.peekitem(index = 0)[1]
+            front_node = dll.front()
+            return front_node.data
+        except:
+            return None
 
