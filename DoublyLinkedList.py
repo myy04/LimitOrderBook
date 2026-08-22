@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+from typing import Any
 
-@dataclass
+@dataclass(eq=False)
 class Node:
     data: Any = None
     _left: Node = None
@@ -34,6 +35,7 @@ class DoublyLinkedList:
         self.__size -= 1
     
     def front(self): 
+        if self.__size == 0: return None
         return self.__root._right
 
     def __len__(self):
