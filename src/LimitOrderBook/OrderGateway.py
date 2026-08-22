@@ -1,0 +1,62 @@
+import time 
+
+from decimal import Decimal
+
+from .MatchingEngine import MatchingEngine
+from .DataTypes import Order, Trade, OrderSide
+
+class OrderException(Exception):
+    def __init__(self):
+        pass
+
+class TickSizeException(OrderException):
+    def __init__(self):
+        pass
+
+class PriceRangeException(OrderException):
+    def __init__(self):
+        pass
+
+class VolumeRangeException(OrderException):
+    def __init__(self):
+        pass
+
+class SideException(OrderException):
+    def __init__(self):
+        pass
+
+
+class OrderGateway:
+    def __init__(self, engine: MatchingEngine):
+        self.__order_counter = 0
+        self.engine: MatchingEngine = engine
+        
+        self.__TICK_SIZE: Decimal = Decimal("0.01")
+
+        self.__MIN_PRICE: int = 1
+        self.__MAX_PRICE: int = int(1e9)
+        self.__MIN_VOLUME: int = 1
+        self.__MAX_VOLUME: int = int(1e9)
+
+    def submit_order(self, side: int, price: float, volume: int) -> list[Trade]:
+        order = self.__construct_order(side, price, volume) 
+        return self.engine.handle_order(order)
+
+
+    def __construct_order(self, side: str, price: float, volume: int) -> Order: 
+        if side != "BUY" and side != "SELL": raise SideException()
+        side = OrderSide.BUY if side == "BUY" else OrderSide.SELL
+
+        price = Decimal(str(price))
+        if price % self.__TICK_SIZE != 0: raise TickSizeException()
+        price = int(price / self.__TICK_SIZE)
+        if price < self.__MIN_PRICE or price > self.__MAX_PRICE: raise PriceRangeException()
+
+        volume = int(volume)
+        if volume < self.__MIN_VOLUME or volume > self.__MAX_VOLUME: raise VolumeRangeException()
+
+        order_id = self.__order_counter + 1
+        self.__order_counter += 1
+
+        order = Order(side = side, price = price, volume = volume, order_id = order_id, timestamp = time.time())
+        return order
