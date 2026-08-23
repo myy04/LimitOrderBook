@@ -1,0 +1,63 @@
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h> 
+
+#include "./include/lob/Types.h"
+
+namespace py = pybind11;
+
+PYBIND11_MODULE(LimitOrderBook_cpp, m) {
+    py::enum_<OrderSide>(m, "OrderSide")
+        .value("BUY", OrderSide::BUY)
+        .value("SELL", OrderSide::SELL);
+
+    py::class_<Order>(m, "Order")
+        .def(py::init<OrderSide, int, int, int, float, std::string>(), 
+            py::arg("side"),
+            py::arg("price"),
+            py::arg("volume"),
+            py::arg("order_id"),
+            py::arg("timestamp"),
+            py::arg("trader_id")
+        )
+        .def_readwrite("side", &Order::side)
+        .def_readwrite("price", &Order::price)
+        .def_readwrite("volume", &Order::volume)
+        .def_readwrite("order_id", &Order::order_id)
+        .def_readwrite("timestamp", &Order::timestamp)
+        .def_readwrite("trader_id", &Order::trader_id);
+
+    py::class_<Trade>(m, "Trade")
+        .def(py::init<Order, Order, int, int>(), 
+            py::arg("aggressor_order"),
+            py::arg("resting_order"),
+            py::arg("price"),
+            py::arg("volume")
+        ) 
+        .def_readwrite("aggressor_order", &Trade::aggressor_order)
+        .def_readwrite("resting_order", &Trade::resting_order)
+        .def_readwrite("price", &Trade::price)
+        .def_readwrite("volume", &Trade::volume);
+
+
+    py::class_<SelfTradeCancellation>(m, "SelfTradeCancellation")
+        .def(py::init<Order, Order, int, int>(), 
+            py::arg("aggressor_order"),
+            py::arg("resting_order"),
+            py::arg("price"),
+            py::arg("volume")
+        ) 
+        .def_readwrite("aggressor_order", &SelfTradeCancellation::aggressor_order)
+        .def_readwrite("resting_order", &SelfTradeCancellation::resting_order)
+        .def_readwrite("price", &SelfTradeCancellation::price)
+        .def_readwrite("volume", &SelfTradeCancellation::volume);
+
+    py::class_<MatchResult>(m, "MatchResult")
+        .def(py::init<std::vector<Trade>, std::vector<SelfTradeCancellation>>(),
+            py::arg("trades"),
+            py::arg("cancellations")
+        )
+        .def_readwrite("trades", &MatchResult::trades)
+        .def_readwrite("cancellations", &MatchResult::cancellations);
+};
+
+
