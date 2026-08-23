@@ -9,7 +9,7 @@ class OrderBook:
     def __init__(self):
         self.__bids = SortedDict() 
         self.__asks = SortedDict()
-        self.__nodes = {}
+        self.__nodes: dict[int, Node] = {}
 
     def insert_order(self, order: Order) -> None:
         if order.side == OrderSide.BUY:
@@ -29,7 +29,7 @@ class OrderBook:
 
     def remove_order(self, order: Order) -> None:
         try:
-            node = self.__nodes.pop(order.order_id)
+            node: Node = self.__nodes.pop(order.order_id)
             if order.side == OrderSide.BUY:
                 dll = self.__bids[order.price]
             else:
