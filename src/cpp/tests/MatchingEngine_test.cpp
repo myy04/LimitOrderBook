@@ -6,16 +6,6 @@
 #include "lob/MatchingEngine.h"
 #include "lob/Types.h"
 
-// NOTE: These tests specify the behavior that MatchingEngine is expected to
-// exhibit, mirroring the reference Python implementation
-// (src/LimitOrderBook/MatchingEngine.py) exactly. As of this writing the C++
-// implementation diverges from that spec in several ways (e.g. it throws on
-// an empty opposite-side book instead of treating the order as non-crossing,
-// it never rests unfilled orders on the book, and it never removes
-// depleted resting orders). Calls that may currently throw are wrapped in
-// ASSERT_NO_THROW so failures are reported as clean gtest assertions rather
-// than aborting the whole test binary with an uncaught exception.
-
 namespace {
 
 std::shared_ptr<Order> make_order(OrderSide side, int price, int volume, int order_id,
