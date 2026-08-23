@@ -1,5 +1,5 @@
 # Limit Order Book & Matching Engine
-A hands-on implementation of a **Limit Order Book (LOB)** built in Python with planned C++ extensions.
+A hands-on implementation of a **Limit Order Book (LOB)** built in Python with C++ extensions.
 ---
 
 ## 💡 How It Works
