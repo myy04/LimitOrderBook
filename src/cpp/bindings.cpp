@@ -2,6 +2,7 @@
 #include <pybind11/stl.h> 
 
 #include "./include/lob/Types.h"
+#include "./include/lob/OrderBook.h"
 
 namespace py = pybind11;
 
@@ -58,6 +59,15 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         )
         .def_readwrite("trades", &MatchResult::trades)
         .def_readwrite("cancellations", &MatchResult::cancellations);
+
+
+    py::class_<OrderBook>(m, "OrderBook")
+        .def(py::init<>())
+        .def("insert_order", &OrderBook::insert_order, py::arg("order"))
+        .def("remove_order", &OrderBook::remove_order, py::arg("order"))
+        .def("peek_best_bid", &OrderBook::peek_best_bid)
+        .def("peek_best_ask", &OrderBook::peek_best_ask);
+
 };
 
 

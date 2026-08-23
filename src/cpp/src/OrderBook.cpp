@@ -7,6 +7,7 @@ void OrderBook::insert_order(std::shared_ptr<Order> order) noexcept {
     if (tree.find(order->price) == tree.end()) tree[order->price] = {};
     auto& list = tree[order->price];
     list.push_back(order);
+    nodes[order->order_id] = --list.end();
 }  
 
 void OrderBook::remove_order(std::shared_ptr<Order> order) noexcept {
@@ -15,6 +16,9 @@ void OrderBook::remove_order(std::shared_ptr<Order> order) noexcept {
     auto& list = tree[order->price];
     auto& node = nodes[order->order_id];
     list.erase(node);
+    nodes.erase(order->order_id);
+
+    if (list.empty()) tree.erase(order->price);
 }
 
 std::shared_ptr<Order> OrderBook::peek_best_bid() {         
@@ -25,6 +29,6 @@ std::shared_ptr<Order> OrderBook::peek_best_bid() {
 
 std::shared_ptr<Order> OrderBook::peek_best_ask() { 
     if (asks.empty()) throw "no asks are in the orderbook";
-    auto& list = asks.rbegin()->second;
+    auto& list = asks.begin()->second;
     return *list.begin();
 }
