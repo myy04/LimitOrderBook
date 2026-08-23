@@ -4,6 +4,7 @@ find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(LimitOrderBook_cpp 
     bindings.cpp
     ./src/OrderBook.cpp
+    ./src/MatchingEngine.cpp
 )
 
 option(LOB_BUILD_TESTS "Build the C++ unit tests (requires GoogleTest)" ON)

@@ -3,6 +3,7 @@
 
 #include "./include/lob/Types.h"
 #include "./include/lob/OrderBook.h"
+#include "./include/lob/MatchingEngine.h"
 
 namespace py = pybind11;
 
@@ -68,6 +69,10 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def("peek_best_bid", &OrderBook::peek_best_bid)
         .def("peek_best_ask", &OrderBook::peek_best_ask);
 
+
+    py::class_<MatchingEngine>(m, "MatchingEngine")
+        .def(py::init<>())
+        .def("handle_order", &MatchingEngine::handle_order, py::arg("order"));
 };
 
 
