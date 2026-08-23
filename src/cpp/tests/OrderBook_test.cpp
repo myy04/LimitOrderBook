@@ -25,12 +25,12 @@ protected:
 
 TEST_F(OrderBookTest, PeekBestBidThrowsWhenBookIsEmpty) {
     // Act & Assert
-    EXPECT_THROW(book.peek_best_bid(), const char *);
+    EXPECT_EQ(book.peek_best_bid(), nullptr);
 }
 
 TEST_F(OrderBookTest, PeekBestAskThrowsWhenBookIsEmpty) {
     // Act & Assert
-    EXPECT_THROW(book.peek_best_ask(), const char *);
+    EXPECT_EQ(book.peek_best_ask(), nullptr);
 }
 
 TEST_F(OrderBookTest, RemovingFromEmptyBookIsNoOp) {
@@ -39,7 +39,7 @@ TEST_F(OrderBookTest, RemovingFromEmptyBookIsNoOp) {
 
     // Act & Assert (no exception expected)
     EXPECT_NO_THROW(book.remove_order(order));
-    EXPECT_THROW(book.peek_best_bid(), const char *);
+    EXPECT_EQ(book.peek_best_bid(), nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -58,7 +58,7 @@ TEST_F(OrderBookTest, InsertedBuyOrderBecomesBestBid) {
     EXPECT_EQ(best_bid->order_id, 1);
     EXPECT_EQ(best_bid->price, 100);
     EXPECT_EQ(best_bid->volume, 10);
-    EXPECT_THROW(book.peek_best_ask(), const char *);
+    EXPECT_EQ(book.peek_best_ask(), nullptr);
 }
 
 TEST_F(OrderBookTest, InsertedSellOrderBecomesBestAsk) {
@@ -72,7 +72,7 @@ TEST_F(OrderBookTest, InsertedSellOrderBecomesBestAsk) {
     auto best_ask = book.peek_best_ask();
     EXPECT_EQ(best_ask->order_id, 1);
     EXPECT_EQ(best_ask->price, 105);
-    EXPECT_THROW(book.peek_best_bid(), const char *);
+    EXPECT_EQ(book.peek_best_bid(), nullptr);
 }
 
 TEST_F(OrderBookTest, BidsAndAsksAreTrackedIndependently) {
@@ -182,7 +182,7 @@ TEST_F(OrderBookTest, RemovingOnlyBidAtPriceLevelClearsTheBook) {
     book.remove_order(order);
 
     // Assert
-    EXPECT_THROW(book.peek_best_bid(), const char *);
+    EXPECT_EQ(book.peek_best_bid(), nullptr);
 }
 
 TEST_F(OrderBookTest, RemovingOnlyAskAtPriceLevelClearsTheBook) {
@@ -194,7 +194,7 @@ TEST_F(OrderBookTest, RemovingOnlyAskAtPriceLevelClearsTheBook) {
     book.remove_order(order);
 
     // Assert
-    EXPECT_THROW(book.peek_best_ask(), const char *);
+    EXPECT_EQ(book.peek_best_ask(), nullptr);
 }
 
 TEST_F(OrderBookTest, RemovingBestBidExposesNextBestPriceLevel) {
@@ -264,7 +264,7 @@ TEST_F(OrderBookTest, RemovingSameOrderTwiceIsSafe) {
 
     // Act & Assert (second removal should be a silent no-op)
     EXPECT_NO_THROW(book.remove_order(order));
-    EXPECT_THROW(book.peek_best_bid(), const char *);
+    EXPECT_EQ(book.peek_best_bid(), nullptr);
 }
 
 // ---------------------------------------------------------------------------

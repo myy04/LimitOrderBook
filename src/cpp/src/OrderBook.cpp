@@ -22,13 +22,13 @@ void OrderBook::remove_order(std::shared_ptr<Order> order) noexcept {
 }
 
 std::shared_ptr<Order> OrderBook::peek_best_bid() {         
-    if (bids.empty()) throw "No bids are in the orderbook";
+    if (bids.empty()) return nullptr;
     auto& list = bids.rbegin()->second;
     return *list.begin();
 }
 
 std::shared_ptr<Order> OrderBook::peek_best_ask() { 
-    if (asks.empty()) throw "no asks are in the orderbook";
+    if (asks.empty()) return nullptr;
     auto& list = asks.begin()->second;
     return *list.begin();
 }

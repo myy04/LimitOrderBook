@@ -9,7 +9,7 @@
 
 class OrderBook {
 public:
-    OrderBook();    
+    explicit OrderBook();    
 
     void insert_order(std::shared_ptr<Order>) noexcept;
     void remove_order(std::shared_ptr<Order>) noexcept;
