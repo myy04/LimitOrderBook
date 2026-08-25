@@ -1,3 +1,4 @@
+from LimitOrderBook import MatchingEngine
 import LimitOrderBook as lob
 import random
 
@@ -20,15 +21,15 @@ class Dataset:
             "WRIGLEYS"
         ]
 
-        PRICE_DIST_MEAN = 100.0
-        PRICE_DIST_SD = 10.0
+        PRICE_DIST_MEAN = 100
+        PRICE_DIST_SD = 10
 
         VOLUME_DIST_MEAN = 10000
         VOLUME_DIST_SD = 1000
 
         order_request = lob.OrderRequest(
-            side = lob.OrderSide.BUY if self.random.randint(0, 1) else lob.OrderSide.SELL,
-            price = self.random.gauss(PRICE_DIST_MEAN, PRICE_DIST_SD),
+            side = "BUY" if self.random.randint(0, 1) else "SELL",
+            price = int(self.random.gauss(PRICE_DIST_MEAN, PRICE_DIST_SD)) * lob.PRICE_TICK_SIZE,
             volume = int(self.random.gauss(VOLUME_DIST_MEAN, VOLUME_DIST_SD)),
             trader_id = POSSIBLE_TRADER_IDS[self.random.randint(0, len(POSSIBLE_TRADER_IDS) - 1)]
         )
@@ -38,5 +39,21 @@ class Dataset:
 
 if __name__ == "__main__":
     dataset = Dataset(10)
-    for order in dataset:
-        print (order)
+    order_gateway = lob.OrderGateway()
+    trades: list[lob.Trade] = []
+    cancellations: list[lob.SelfTradeCancellation] = []
+
+    for order_request in dataset:
+        print("Order:", order_request)
+        try:
+            match: lob.MatchResult = order_gateway.submit_order_request(order_request)
+            trades.extend(match.trades)
+            cancellations.extend(match.cancellations)
+        except Exception as e:
+            print(type(e), e)
+
+    print("Trades:", trades)
+
+    print("Cancellations:", cancellations)
+            
+    

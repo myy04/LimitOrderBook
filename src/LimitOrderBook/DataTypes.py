@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from enum import Enum
 
 class OrderSide(Enum):
-    SELL = 1
-    BUY = 0
+    SELL = 0
+    BUY = 1
 
 @dataclass
 class Order:

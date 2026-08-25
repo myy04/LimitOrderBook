@@ -1,3 +1,4 @@
+from LimitOrderBook import PRICE_TICK_SIZE
 import time 
 
 from decimal import Decimal
@@ -34,21 +35,24 @@ class OrderRequest:
     trader_id: str
 
 class OrderGateway:
-    def __init__(self, engine: MatchingEngine):
+    def __init__(self, engine: MatchingEngine = MatchingEngine()):
         self.__order_counter = 0
         self.engine: MatchingEngine = engine
         
-        self.__TICK_SIZE: Decimal = Decimal("0.01")
+        self.__TICK_SIZE: Decimal = Decimal(str(PRICE_TICK_SIZE))
 
         self.__MIN_PRICE: int = 1
         self.__MAX_PRICE: int = int(1e9)
         self.__MIN_VOLUME: int = 1
         self.__MAX_VOLUME: int = int(1e9)
 
-    def submit_order(self, order_request: OrderRequest) -> MatchResult:
+    def submit_order_request(self, order_request: OrderRequest) -> MatchResult:
         order = self.__construct_order(trader_id=order_request.trader_id, side=order_request.side, price=order_request.price, volume=order_request.volume) 
         return self.engine.handle_order(order)
 
+    def submit_order(self, trader_id, side, price, volume) -> MatchResult:
+        order = self.__construct_order(trader_id=trader_id, side=side, price=price, volume=volume) 
+        return self.engine.handle_order(order)
 
     def __construct_order(self, trader_id: str, side: str, price: float, volume: int) -> Order: 
         if side != "BUY" and side != "SELL": raise SideException()
