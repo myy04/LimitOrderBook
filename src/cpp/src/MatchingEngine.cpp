@@ -7,6 +7,15 @@ MatchResult MatchingEngine::handle_order(std::shared_ptr<Order> order) {
     else return handle_sell(std::move(order));
 }
 
+std::vector<MatchResult> MatchingEngine::handle_orders(std::vector<std::shared_ptr<Order>> orders) {
+    std::vector<MatchResult> results{orders.size(), MatchResult{}};
+    for (int order_idx = 0; order_idx < orders.size(); order_idx++) {
+        auto& order = orders[order_idx];
+        results[order_idx] = handle_order(order); 
+    }
+    return results;
+}
+
 MatchResult MatchingEngine::handle_buy(std::shared_ptr<Order> order) {
     MatchResult ret{};
 
@@ -35,6 +44,7 @@ MatchResult MatchingEngine::handle_buy(std::shared_ptr<Order> order) {
     if (order->volume > 0) order_book.insert_order(std::move(order));
     return ret;
 }
+
 
 MatchResult MatchingEngine::handle_sell(std::shared_ptr<Order> order) {
     MatchResult ret{};

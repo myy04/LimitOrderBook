@@ -26,6 +26,13 @@ class SideException(OrderException):
         pass
 
 
+@dataclass
+class OrderRequest:
+    side: OrderSide
+    price: float
+    volume: int
+    trader_id: str
+
 class OrderGateway:
     def __init__(self, engine: MatchingEngine):
         self.__order_counter = 0
@@ -38,8 +45,8 @@ class OrderGateway:
         self.__MIN_VOLUME: int = 1
         self.__MAX_VOLUME: int = int(1e9)
 
-    def submit_order(self, trader_id: str, side: int, price: float, volume: int) -> MatchResult:
-        order = self.__construct_order(trader_id=trader_id, side=side, price=price, volume=volume) 
+    def submit_order(self, order_request: OrderRequest) -> MatchResult:
+        order = self.__construct_order(trader_id=order_request.trader_id, side=order_request.side, price=order_request.price, volume=order_request.volume) 
         return self.engine.handle_order(order)
 
 

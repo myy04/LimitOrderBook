@@ -8,6 +8,7 @@ class MatchingEngine {
 public: 
     explicit MatchingEngine();
     MatchResult handle_order(std::shared_ptr<Order> order); 
+    std::vector<MatchResult> handle_orders(std::vector<std::shared_ptr<Order>> orders);
 private:
     MatchResult handle_buy(std::shared_ptr<Order> order);
     MatchResult handle_sell(std::shared_ptr<Order> order);
