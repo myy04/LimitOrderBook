@@ -1,6 +1,9 @@
-from LimitOrderBook import MatchingEngine
 import LimitOrderBook as lob
-import random
+
+import random, time
+
+from decimal import Decimal
+
 
 class Dataset:
     def __init__(self, length : int, seed : int=47):
@@ -29,7 +32,7 @@ class Dataset:
 
         order_request = lob.OrderRequest(
             side = "BUY" if self.random.randint(0, 1) else "SELL",
-            price = int(self.random.gauss(PRICE_DIST_MEAN, PRICE_DIST_SD)) * lob.PRICE_TICK_SIZE,
+            price = Decimal(str(int(self.random.gauss(PRICE_DIST_MEAN, PRICE_DIST_SD)))) * Decimal(lob.PRICE_TICK_SIZE),
             volume = int(self.random.gauss(VOLUME_DIST_MEAN, VOLUME_DIST_SD)),
             trader_id = POSSIBLE_TRADER_IDS[self.random.randint(0, len(POSSIBLE_TRADER_IDS) - 1)]
         )
@@ -37,23 +40,33 @@ class Dataset:
         return order_request
 
 
-if __name__ == "__main__":
-    dataset = Dataset(10)
-    order_gateway = lob.OrderGateway()
-    trades: list[lob.Trade] = []
-    cancellations: list[lob.SelfTradeCancellation] = []
-
+def benchmark_python(dataset): 
+    engine = lob.MatchingEngine()
+    order_gateway = lob.OrderGateway(engine=engine)
+    t0 = time.perf_counter()
     for order_request in dataset:
-        print("Order:", order_request)
-        try:
-            match: lob.MatchResult = order_gateway.submit_order_request(order_request)
-            trades.extend(match.trades)
-            cancellations.extend(match.cancellations)
-        except Exception as e:
-            print(type(e), e)
+        order_gateway.submit_order_request(order_request)
+    t1 = time.perf_counter() - t0
+    return t1
 
-    print("Trades:", trades)
+def benchmark_cpp(dataset):
+    engine = lob.cpp.MatchingEngine()
+    order_gateway = lob.OrderGateway(engine=engine)
+    t0 = time.perf_counter()
+    for order_request in dataset:
+        order_gateway.submit_order_request(order_request)
+    t1 = time.perf_counter() - t0
+    return t1
 
-    print("Cancellations:", cancellations)
-            
-    
+
+
+if __name__ == "__main__":
+
+    for dataset_length in [int(1e2), int(1e4), int(1e6)]:
+        dataset = Dataset(dataset_length)
+
+        print("Orders:", dataset_length)
+        print("Python:", benchmark_python(dataset))
+        print("CPP:", benchmark_cpp(dataset))
+
+        print("-" * 100)

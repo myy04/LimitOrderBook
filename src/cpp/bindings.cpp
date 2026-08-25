@@ -12,7 +12,7 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .value("BUY", OrderSide::BUY)
         .value("SELL", OrderSide::SELL);
 
-    py::class_<Order>(m, "Order")
+    py::class_<Order, std::shared_ptr<Order>>(m, "Order")
         .def(py::init<OrderSide, int, int, int, float, std::string>(), 
             py::arg("side"),
             py::arg("price"),

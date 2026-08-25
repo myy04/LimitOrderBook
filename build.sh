@@ -17,5 +17,7 @@ cmake -S src/cpp -B build \
 
 cmake --build build --config Release -j2
 
-PYTHONPATH=build .venv/bin/python3 -c \
-'import LimitOrderBook_cpp; print("C++ module loaded")'
+# PYTHONPATH=build .venv/bin/python3 -c \
+# 'import LimitOrderBook_cpp; print("C++ module loaded")'
+
+PYTHONPATH=./build

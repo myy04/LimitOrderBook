@@ -6,6 +6,8 @@ from decimal import Decimal
 from .MatchingEngine import MatchingEngine
 from .DataTypes import *
 
+from . import LimitOrderBook_cpp as cpp 
+
 class OrderException(Exception):
     def __init__(self):
         pass
@@ -35,9 +37,9 @@ class OrderRequest:
     trader_id: str
 
 class OrderGateway:
-    def __init__(self, engine: MatchingEngine = MatchingEngine()):
+    def __init__(self, engine: MatchingEngine = None):
         self.__order_counter = 0
-        self.engine: MatchingEngine = engine
+        self.engine: MatchingEngine = engine if engine is not None else MatchingEngine()
         
         self.__TICK_SIZE: Decimal = Decimal(str(PRICE_TICK_SIZE))
 
@@ -69,5 +71,17 @@ class OrderGateway:
         order_id = self.__order_counter + 1
         self.__order_counter += 1
 
-        order = Order(trader_id = trader_id, side = side, price = price, volume = volume, order_id = order_id, timestamp = time.time())
+        if isinstance(self.engine, MatchingEngine): order = Order(trader_id = trader_id, side = side, price = price, volume = volume, order_id = order_id, timestamp = time.time())
+        elif isinstance(self.engine, cpp.MatchingEngine): 
+            order = cpp.Order(
+                trader_id = trader_id, 
+                side = cpp.OrderSide.BUY if side == OrderSide.BUY else cpp.OrderSide.SELL,
+                price = price,
+                volume = volume,
+                order_id = order_id,
+                timestamp = float(time.time())
+            )
+        else:
+            raise Exception("Engine is of wrong type")
+
         return order
