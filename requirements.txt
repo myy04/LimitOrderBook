@@ -1,0 +1,14 @@
+colorama==0.4.6
+iniconfig==2.3.0
+-e git+https://github.com/myy04/LimitOrderBook.git@a50492525466f2b9c5e12d9c3c5f60e67f969d37#egg=LimitOrderBook
+numpy==2.5.2
+packaging==26.3
+pluggy==1.6.0
+pybind11==3.1.0
+Pygments==2.21.0
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.19
+PyQt5_sip==12.19.0
+pyqtgraph==0.14.0
+pytest==9.1.1
+sortedcontainers==2.4.0
