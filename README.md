@@ -2,7 +2,7 @@
 
 This is my own implementation of Limit Order Book and Maching Engine in Python and C++. 
 
-# Pipeline
+### Pipeline
 
 -- OrderGateway provides the public API for submitting orders via OrderGateway.submit_orders() or OrderGateway.submit_order_request().
 
@@ -13,7 +13,7 @@ This is my own implementation of Limit Order Book and Maching Engine in Python a
 -- MatchingEngine and OrderBook have implementations in Python and C++. The  C++ implementations can be used in Python code via pybind11.
 
 
-# CPP vs Python MatchingEngine Peformance
+### CPP vs Python MatchingEngine Peformance
 
 Orders: 100
 
