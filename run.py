@@ -21,7 +21,7 @@ if __name__ == "__main__":
             try:
                 order_gateway.submit_order_request(order)
             except Exception as e:
-                print(e)
+                pass
 
     generator_thread = threading.Thread(target = feed_orders, daemon=True)
     generator_thread.start()

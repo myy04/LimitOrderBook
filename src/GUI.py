@@ -22,32 +22,48 @@ class GUI(QWidget):
         self.bid_text  = QColor(180, 255, 200)
         self.ask_text  = QColor(255, 200, 200)
 
-        # Enable antialiasing for smoother plots
         pg.setConfigOptions(antialias=True)
 
-        # ---- Historical data for plotting ----
-        self.history_limit = 100  # Keep last 100 snapshots
-        self.time_counter = 0     # Strictly increasing counter for X-axis
+        self.history_limit = 100
+        self.time_counter = 0
         self.time_history = []
         self.best_bid_history = []
         self.best_ask_history = []
 
         self._build_ui()
 
-        # ---- Refresh timer (replaces time.sleep(1) and os.system('clear')) ----
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.consume_snapshot)
         self.timer.start(1000)
 
-        # Trigger one immediate update
         QTimer.singleShot(0, self.consume_snapshot)
 
+    # ------------------------------------------------------------------ #
+    #  NEW: Handle window closure cleanly to prevent crash
+    # ------------------------------------------------------------------ #
+    def closeEvent(self, event):
+        # 1. Stop the timer so it doesn't fire while we are destroying widgets
+        self.timer.stop()
+        
+        # 2. Safely clear the pyqtgraph data to avoid C++ segfaults
+        try:
+            self.bid_curve.clear()
+            self.ask_curve.clear()
+            self.plot_widget.clear()
+        except Exception:
+            pass
+            
+        # 3. Accept the close event and shut down
+        event.accept()
+        
+    # ------------------------------------------------------------------ #
+    #  UI construction
+    # ------------------------------------------------------------------ #
     def _build_ui(self):
         root = QVBoxLayout(self)
         root.setContentsMargins(12, 12, 12, 12)
         root.setSpacing(8)
 
-        # ---- Header / status ----
         self.status_label = QLabel("Waiting for first snapshot…")
         self.status_label.setStyleSheet(
             "font-size: 14px; font-weight: bold; color: #ddd;"
@@ -55,11 +71,9 @@ class GUI(QWidget):
         )
         root.addWidget(self.status_label)
 
-        # ---- Splitter to allow resizing Plot vs Tables ----
         splitter = QSplitter(Qt.Vertical)
         root.addWidget(splitter, stretch=1)
 
-        # ---- 1. Price Plot (Top) ----
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground("#1e1e1e")
         self.plot_widget.setLabel("left", "Price")
@@ -67,19 +81,16 @@ class GUI(QWidget):
         self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
         self.plot_widget.addLegend(offset=(-10, 10))
         
-        # Use PyQtGraph's infinite line for the mid-price separator feel
         self.bid_curve = self.plot_widget.plot([], [], pen=pg.mkPen(color=(0, 255, 100), width=2), name="Best Bid")
         self.ask_curve = self.plot_widget.plot([], [], pen=pg.mkPen(color=(255, 0, 100), width=2), name="Best Ask")
         
         splitter.addWidget(self.plot_widget)
 
-        # ---- 2. Order Book Tables (Bottom) ----
         book_widget = QWidget()
         book_layout = QVBoxLayout(book_widget)
         book_layout.setContentsMargins(0, 0, 0, 0)
         book_layout.setSpacing(4)
 
-        # ---- Column header strip ----
         col_header = QLabel(
             f"{'TRADER_ID'.center(22)}|{'PRICE'.center(22)}|{'VOLUME'.center(22)}"
         )
@@ -90,7 +101,6 @@ class GUI(QWidget):
         col_header.setAlignment(Qt.AlignCenter)
         book_layout.addWidget(col_header)
 
-        # ---- Asks table (top, displayed in reverse order) ----
         self.asks_label = self._section_label("ASKS", self.ask_color, self.ask_text)
         book_layout.addWidget(self.asks_label)
 
@@ -98,13 +108,11 @@ class GUI(QWidget):
         self._style_table(self.asks_table, self.ask_color, self.ask_text)
         book_layout.addWidget(self.asks_table, stretch=1)
 
-        # ---- Mid separator ----
         self.mid_label = QLabel("")
         self.mid_label.setStyleSheet("background:#444; height:2px;")
         self.mid_label.setFixedHeight(2)
         book_layout.addWidget(self.mid_label)
 
-        # ---- Bids table (bottom) ----
         self.bids_label = self._section_label("BIDS", self.bid_color, self.bid_text)
         book_layout.addWidget(self.bids_label)
 
@@ -113,15 +121,9 @@ class GUI(QWidget):
         book_layout.addWidget(self.bids_table, stretch=1)
 
         splitter.addWidget(book_widget)
-        
-        # Set initial sizes (40% plot, 60% tables)
         splitter.setSizes([400, 600])
-
         self.setStyleSheet("background:#1e1e1e;")
 
-    # ------------------------------------------------------------------ #
-    #  Helpers
-    # ------------------------------------------------------------------ #
     def _section_label(self, text, bg, fg):
         lbl = QLabel(text)
         lbl.setStyleSheet(
@@ -187,14 +189,11 @@ class GUI(QWidget):
                 cell.setFlags(Qt.ItemIsEnabled)
                 table.setItem(r, c, cell)
 
-    # ------------------------------------------------------------------ #
-    #  Main refresh routine
-    # ------------------------------------------------------------------ #
     def consume_snapshot(self):
         try: 
             snapshot: lob.BookSnapshot = self.pull_from_buffer()
         except queue.Empty:
-            return  # No new data, keep the screen as is
+            return
         except Exception as e:
             self.status_label.setText(f"Error pulling snapshot: {e}")
             return
@@ -203,13 +202,9 @@ class GUI(QWidget):
         asks = snapshot.asks
         snapshot_time = snapshot.time
 
-        # --- Update Tables ---
         self._fill_table(self.asks_table, asks, reverse=True)
         self._fill_table(self.bids_table, bids, reverse=False)
 
-        # --- Update Plot Data ---
-        # Find best bid (max price) and best ask (min price)
-        # Using float('nan') if empty so the plot shows a gap instead of dropping to zero
         best_bid = float('nan')
         if bids:
             best_bid = float(max(b.price for b in bids) * lob.PRICE_TICK_SIZE)
@@ -223,18 +218,15 @@ class GUI(QWidget):
         self.best_ask_history.append(best_ask)
         self.time_counter += 1
 
-        # Limit history to prevent memory leak / lag
         if len(self.time_history) > self.history_limit:
             self.time_history.pop(0)
             self.best_bid_history.pop(0)
             self.best_ask_history.pop(0)
 
-        # Convert to numpy arrays for pyqtgraph stability
         x_data = np.array(self.time_history)
         y_bid = np.array(self.best_bid_history, dtype=float)
         y_ask = np.array(self.best_ask_history, dtype=float)
 
-        # Set data to curves
         self.bid_curve.setData(x_data, y_bid)
         self.ask_curve.setData(x_data, y_ask)
 
