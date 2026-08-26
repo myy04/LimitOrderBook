@@ -1,7 +1,7 @@
 import decimal
 PRICE_TICK_SIZE = decimal.Decimal("0.01")
 SNAPSHOT_PERIOD = 1
-SNAPSHOT_DEPTH = 5
+SNAPSHOT_DEPTH = 10
 
 from LimitOrderBook.DataTypes import *
 from LimitOrderBook.MatchingEngine import *

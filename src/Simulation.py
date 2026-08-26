@@ -1,18 +1,31 @@
 from OrderGenerator import OrderGenerator
 import LimitOrderBook as lob
-from Vizualizer import Vizualizer
+from GUI import GUI
 import threading
 
 import queue
+import sys
+from PyQt5.QtWidgets import QApplication
 
 if __name__ == "__main__":
     snapshot_queue = queue.Queue(maxsize=20)
-    engine = lob.MatchingEngine(push_to_buffer=snapshot_queue.put)
+    engine = lob.MatchingEngine(push_to_buffer=snapshot_queue.put_nowait)
     order_gateway = lob.OrderGateway(engine=engine)
-    viz_thread = threading.Thread(target = Vizualizer(pull_from_buffer=snapshot_queue.get).run)
-    viz_thread.start()
-    for order in OrderGenerator():
-        try:
-            order_gateway.submit_order_request(order) 
-        except:
-            pass
+
+    app = QApplication(sys.argv)
+    
+    gui = GUI(pull_from_buffer=snapshot_queue.get_nowait)
+
+    def feed_orders():
+        for order in OrderGenerator():
+            try:
+                order_gateway.submit_order_request(order)
+            except Exception as e:
+                print(e)
+
+    generator_thread = threading.Thread(target = feed_orders, daemon=True)
+    generator_thread.start()
+
+    gui.show()
+    sys.exit(app.exec_())
+
