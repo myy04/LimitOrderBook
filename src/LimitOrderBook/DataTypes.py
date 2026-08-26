@@ -33,3 +33,9 @@ class SelfTradeCancellation:
 class MatchResult:
     trades: list[Trade]
     cancellations: list[SelfTradeCancellation]
+
+@dataclass 
+class BookSnapshot:
+    bids: list[Order]
+    asks: list[Order]
+    time: float
