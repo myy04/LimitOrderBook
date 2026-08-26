@@ -20,15 +20,15 @@ class OrderGenerator:
             "WRIGLEYS"
         ]
 
-        AVG_PRICE_DIST_MEAN = 1000
-        AVG_PRICE_DIST_SD = 100
+        PRICE_DIST_MEAN = 100000
+        PRICE_DIST_SD = 100
 
         VOLUME_DIST_MEAN = 10000
         VOLUME_DIST_SD = 1000
 
         while True:
-            PRICE_DIST_MEAN = int(self.random.gauss(AVG_PRICE_DIST_MEAN, AVG_PRICE_DIST_SD))
-            PRICE_DIST_SD = 10
+            PRICE_DIST_MEAN = int(self.random.gauss(PRICE_DIST_MEAN, PRICE_DIST_SD))
+            PRICE_DIST_SD = 100
 
             order_request = lob.OrderRequest(
                 side = "BUY" if self.random.randint(0, 1) else "SELL",

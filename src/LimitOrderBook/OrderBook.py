@@ -69,8 +69,8 @@ class OrderBook:
             try:
                 dll = self.__bids.peekitem(index = -tree_index)[1]
                 for node in dll:
+                    if len(best_bids) >= depth: break
                     best_bids += [copy(node.data)]
-                    if len(best_bids) == depth: break
             except:
                 break
         
@@ -79,8 +79,8 @@ class OrderBook:
             try:
                 dll = self.__asks.peekitem(index = tree_index)[1]
                 for node in dll:
+                    if len(best_asks) >= depth: break
                     best_asks += [copy(node.data)]
-                    if len(best_asks) == depth: break
             except:
                 break   
     
