@@ -2,6 +2,8 @@
 
 This is my own implementation of Limit Order Book and Maching Engine in Python and C++. 
 
+![Screenshot](./images/gui_screenshot.png)
+
 ### Pipeline
 
 -- OrderGateway provides the public API for submitting orders via OrderGateway.submit_orders() or OrderGateway.submit_order_request().
