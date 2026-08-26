@@ -14,14 +14,25 @@ This is my own implementation of Limit Order Book and Maching Engine in Python a
 
 
 # CPP vs Python MatchingEngine Peformance
+
 Orders: 100
+
 Python: 0.0006763339042663574
+
 CPP: 0.00019420799799263477
 
+
+
 Orders: 10000
+
 Python: 0.03685137489810586
+
 CPP: 0.015233041951432824
 
+
+
 Orders: 1000000
+
 Python: 3.839766375022009
+
 CPP: 1.5110946670174599
