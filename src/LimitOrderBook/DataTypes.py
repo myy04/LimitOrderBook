@@ -39,3 +39,8 @@ class BookSnapshot:
     bids: list[Order]
     asks: list[Order]
     time: float
+    trades: list[Trade] = None
+
+    def __post_init__(self):
+        if self.trades is None:
+            self.trades = []

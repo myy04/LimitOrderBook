@@ -13,10 +13,13 @@ class MatchingEngine:
         self.order_book = OrderBook()   
         self.push_to_buffer: Callable[[BookSnapshot], None] = push_to_buffer if push_to_buffer is not None else lambda x: None
         self.last_snapshot_time: float = 0.0
+        self.recent_trades: list[Trade] = []
 
     def handle_order(self, order: Order) -> MatchResult:
         if order.side == OrderSide.BUY: result = self.__handle_buy(order)
         else: result= self.__handle_sell(order)
+
+        self.recent_trades.extend(result.trades)
 
         if time.time() - self.last_snapshot_time > SNAPSHOT_PERIOD:
             self.__save_snapshot(SNAPSHOT_DEPTH)
@@ -95,4 +98,6 @@ class MatchingEngine:
 
     def __save_snapshot(self, depth):
         snapshot = self.order_book.get_snapshot(depth)
+        snapshot.trades = self.recent_trades
+        self.recent_trades = []
         self.push_to_buffer(snapshot)
