@@ -1,56 +1,29 @@
-# Limit Order Book & Matching Engine
-A hands-on implementation of a **Limit Order Book (LOB)** built in Python with C++ extensions.
----
+# Limit Order Book
 
-## 💡 How It Works
+This is my own implementation of Limit Order Book and Maching Engine in Python and C++. 
 
-1. **Order Ingestion (`OrderGateway`)**:
-   Incoming orders are validated for tick sizes, allowed price ranges, and valid quantities. Prices are converted from floating-point decimals to discrete integer ticks (e.g., `$100.50` at tick size `$0.01` becomes `10050`).
+# Pipeline
 
-2. **Continuous Matching (`MatchingEngine`)**:
-   - When an aggressive order arrives, the engine looks at the opposite side of the book (bids for a sell order, asks for a buy order).
-   - If the prices cross, trades are executed at the **resting order's price**.
-   - If both sides of a trade belong to the same `trader_id`, the engine activates **Self-Trade Prevention (STP)** to cancel the overlapping volume and prevent self-execution.
+OrderGateway provides the public API for submitting orders via OrderGateway.submit_orders() or OrderGateway.submit_order_request().
+The gateway checks if the order request is valid (price range, volume range, divisibility by price_tick), constructs a new valid older, and sends it to the matching engine. 
+The matching engine matches the aggressor order and the resting orders from the order book and returns the list of completed trades.
 
-3. **Resting on Book (`OrderBook`)**:
-   Unfilled volume is inserted into the book at its corresponding price level. Orders at the same price are queued in a **Doubly Linked List** to maintain strict **FIFO (First-In, First-Out)** execution order.
+MatchingEngine and OrderBook have implementations in Python and C++. 
+The C++ implementations can be used in Python code via pybind11.
 
----
+Here is the performance difference (Python Engine vs CPP Engine):
 
-## 🏗 System Architecture & Complexity
-
-```
-Incoming Order
-      │
-      ▼
-┌───────────────────────────────┐
-│         OrderGateway          │  ◄── Validates tick sizes & price/volume bounds;
-└──────────────┬────────────────┘      assigns sequential order_id & timestamps
-               │
-               ▼
-┌───────────────────────────────┐
-│        MatchingEngine         │  ◄── Matches crossing trades & handles STP
-└──────────────┬────────────────┘
-               │
-      ┌────────┴────────┐
-      ▼                 ▼
-┌───────────┐     ┌───────────┐
-│ Bids Tree │     │ Asks Tree │    ◄── SortedDict (Price Levels)
-└─────┬─────┘     └─────┬─────┘
-      │                 │
-      ▼                 ▼
-┌─────────────────────────────┐
-│      DoublyLinkedList       │    ◄── FIFO Order Queue at each price level
-└─────────────────────────────┘
-```
-
-### Time Complexity Breakdown
-
-| Operation | Complexity | Implementation Details |
-|---|---|---|
-| **Peek Best Bid / Ask** | $O(1)$ | Direct lookup of min/max key in `SortedDict` + queue head. |
-| **Insert Resting Order** | $O(\log M)$ | Find/insert price level in `SortedDict` ($M$ unique prices) + $O(1)$ list append. |
-| **Cancel / Remove Order** | $O(1)$ | $O(1)$ node lookup in a hash map + $O(1)$ node removal in `DoublyLinkedList`. |
-| **Match Aggressor Order** | $O(K)$ | Proportional to the number of filled resting orders ($K$). |
-
----
+yerdaulet@Yerdaulets-MacBook-Pro: ~/Development/LimitOrderBook main ⚡
+$ python benchmark.py                                                                                       
+Orders: 100
+Python: 0.0006763339042663574
+CPP: 0.00019420799799263477
+----------------------------------------------------------------------------------------------------
+Orders: 10000
+Python: 0.03685137489810586
+CPP: 0.015233041951432824
+----------------------------------------------------------------------------------------------------
+Orders: 1000000
+Python: 3.839766375022009
+CPP: 1.5110946670174599
+----------------------------------------------------------------------------------------------------
