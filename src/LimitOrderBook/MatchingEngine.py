@@ -6,19 +6,22 @@ import time
 
 from .OrderBook import OrderBook
 from .DataTypes import *
+from .SnapshotBuffer import SnapshotBuffer 
+
 from LimitOrderBook import SNAPSHOT_PERIOD, SNAPSHOT_DEPTH
 
+
 class MatchingEngine:
-    def __init__(self, push_to_buffer: Callable[[BookSnapshot], None] = None):
+    def __init__(self, snapshot_buffer: SnapshotBuffer = None):
         self.order_book = OrderBook()   
-        self.push_to_buffer: Callable[[BookSnapshot], None] = push_to_buffer if push_to_buffer is not None else lambda x: None
+        self.snapshot_buffer = snapshot_buffer if snapshot_buffer is not None else None
         self.last_snapshot_time: float = 0.0
 
     def handle_order(self, order: Order) -> MatchResult:
         if order.side == OrderSide.BUY: result = self.__handle_buy(order)
         else: result= self.__handle_sell(order)
 
-        if time.time() - self.last_snapshot_time > SNAPSHOT_PERIOD:
+        if self.snapshot_buffer is not None and time.time() - self.last_snapshot_time > SNAPSHOT_PERIOD:
             self.__save_snapshot(SNAPSHOT_DEPTH)
             self.last_snapshot_time = time.time()
 
@@ -95,4 +98,4 @@ class MatchingEngine:
 
     def __save_snapshot(self, depth):
         snapshot = self.order_book.get_snapshot(depth)
-        self.push_to_buffer(snapshot)
+        self.snapshot_buffer.push(snapshot)

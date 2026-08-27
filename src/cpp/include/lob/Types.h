@@ -29,10 +29,15 @@ struct SelfTradeCancellation {
     int price;
 };
 
-
 struct MatchResult {
     std::vector<Trade> trades;
     std::vector<SelfTradeCancellation> cancellations;
+};
+
+struct BookSnapshot {
+    std::vector<Order> bids;
+    std::vector<Order> asks;
+    float time;
 };
 
 #endif //TYPES_H

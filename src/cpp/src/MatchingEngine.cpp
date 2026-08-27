@@ -87,3 +87,8 @@ SelfTradeCancellation MatchingEngine::handle_self_trade(std::shared_ptr<Order> a
     if (resting_order->volume == 0) order_book.remove_order(resting_order);
     return cancel;
 }
+
+
+void MatchingEngine::save_snapshot(int depth) {
+    
+}

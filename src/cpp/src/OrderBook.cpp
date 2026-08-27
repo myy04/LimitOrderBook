@@ -32,3 +32,36 @@ std::shared_ptr<Order> OrderBook::peek_best_ask() {
     auto& list = asks.begin()->second;
     return *list.begin();
 }
+
+BookSnapshot OrderBook::get_snapshot(int depth) {
+    BookSnapshot snapshot{};
+
+    for (auto i = bids.rbegin(); i != bids.rend(); i++) {
+        if (snapshot.bids.size() >= depth) break;
+        
+        const int price = i->first;
+        const auto& list = i->second;
+    
+        for (auto& order : list) {
+            snapshot.bids.push_back(*order);
+            if (snapshot.bids.size() >= depth) break;
+        }
+    }
+
+    for (auto i = asks.begin(); i != asks.end(); i++) {
+        if (snapshot.asks.size() >= depth) break;
+        
+        const int price = i->first;
+        const auto& list = i->second;
+    
+        for (auto& order : list) {
+            snapshot.asks.push_back(*order);
+            if (snapshot.asks.size() >= depth) break;
+        }
+    }
+    
+    snapshot.time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); 
+    // to mimic python time.time()
+
+    return snapshot;
+}

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <list>
 #include <memory>
+#include <chrono>
 
 class OrderBook {
 public:
@@ -15,6 +16,7 @@ public:
     void remove_order(std::shared_ptr<Order>) noexcept;
     std::shared_ptr<Order> peek_best_bid();
     std::shared_ptr<Order> peek_best_ask();
+    BookSnapshot get_snapshot(int depth);
 
 private:
     std::map<int, std::list<std::shared_ptr<Order>>> bids;
