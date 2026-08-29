@@ -61,9 +61,14 @@ BookSnapshot OrderBook::get_snapshot() {
             if (snapshot.asks.size() >= depth) break;
         }
     }
+
+    std::time_t now = std::time(nullptr);
+    std::tm* local_time = std::localtime(&now);
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%H:%M:%S", local_time);
+    std::string time_str(buffer);
     
-    snapshot.time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count(); 
-    // to mimic python time.time()
+    snapshot.time = time_str;
 
     return snapshot;
 }

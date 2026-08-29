@@ -4,7 +4,7 @@ set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "../src/LimitOrderBook")
-set(CMAKE_CXX_STANDARD_REQUIRED 17)
+set(CMAKE_CXX_STANDARD_REQUIRED 20)
 
 pybind11_add_module(LimitOrderBook_cpp 
     bindings.cpp

@@ -12,6 +12,7 @@ from .DataTypes import *
 from .DoublyLinkedList import Node, DoublyLinkedList
 
 import time
+from datetime import datetime
 
 class OrderBook:
     def __init__(self):
@@ -90,7 +91,7 @@ class OrderBook:
             except:
                 break   
     
-        snapshot = BookSnapshot(bids = best_bids, asks=best_asks, time = time.time())
+        snapshot = BookSnapshot(bids = best_bids, asks=best_asks, time = datetime.now().strftime("%H:%M:%S"))
         return snapshot
 
         

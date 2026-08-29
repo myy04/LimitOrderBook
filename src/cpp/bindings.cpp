@@ -71,7 +71,7 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def("peek_best_ask", &OrderBook::peek_best_ask);
 
     py::class_<BookSnapshot>(m, "BookSnapshot")
-        .def(py::init<std::vector<Order>, std::vector<Order>, float>(),
+        .def(py::init<std::vector<Order>, std::vector<Order>, std::string>(),
             py::arg("bids"),
             py::arg("asks"),
             py::arg("time")

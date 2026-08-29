@@ -3,22 +3,23 @@ import time, os
 
 class CLI:
     def __init__(self, engine):
-        self.engine = engine
+        self.engine: lob.MatchingEngine | lob.cpp.MatchingEngine = engine
 
     def __consume_snapshot(self):
-        try: 
+        try:
             snapshot: lob.BookSnapshot = self.engine.pull_snapshot()
         except:
-            return 
-
+            return
+        
         bids = snapshot.bids
         asks = snapshot.asks
         snapshot_time = snapshot.time
 
-        try:
-            spread = asks[0].price - bids[0].price 
-        except:
-            spread = 0
+        if not bids or not asks: return
+
+        spread = asks[0].price - bids[0].price 
+        
+        os.system('clear')        
 
         print("TIME: ", snapshot_time)
         print()
@@ -44,9 +45,7 @@ class CLI:
             print('-' * len(line))
 
         print("SPREAD:", spread)
-
-        time.sleep(1)
-        os.system('clear')        
+        # time.sleep(1)
 
     def run(self):
         while True:

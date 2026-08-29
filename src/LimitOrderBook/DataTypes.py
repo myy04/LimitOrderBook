@@ -38,4 +38,4 @@ class MatchResult:
 class BookSnapshot:
     bids: list[Order]
     asks: list[Order]
-    time: float
+    time: str

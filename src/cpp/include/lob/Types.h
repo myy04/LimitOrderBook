@@ -37,7 +37,7 @@ struct MatchResult {
 struct BookSnapshot {
     std::vector<Order> bids{};
     std::vector<Order> asks{};
-    float time{};
+    std::string time{};
 };
 
 #endif //TYPES_H
