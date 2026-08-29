@@ -9,6 +9,7 @@ class SnapshotBuffer {
 public:
     explicit SnapshotBuffer();
     void push(BookSnapshot snapshot);
+
     BookSnapshot pull();
 private:    
     std::queue<BookSnapshot> buffer;

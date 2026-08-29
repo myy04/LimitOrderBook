@@ -2,7 +2,7 @@ import LimitOrderBook as lob
 import time, os
 
 class CLI:
-    def __init__(self, engine: lob.MatchingEngine | lob.cpp.MatchingEngine):
+    def __init__(self, engine):
         self.engine = engine
 
     def __consume_snapshot(self):

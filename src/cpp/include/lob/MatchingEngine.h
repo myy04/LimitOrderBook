@@ -10,7 +10,7 @@
 
 class MatchingEngine {  
 public: 
-    explicit MatchingEngine() = default;
+    explicit MatchingEngine(); 
 
     MatchResult handle_order(std::shared_ptr<Order> order); 
     std::vector<MatchResult> handle_orders(std::vector<std::shared_ptr<Order>> orders);
@@ -24,9 +24,9 @@ private:
 
     void push_snapshot(BookSnapshot);
 
-    OrderBook order_book{};
-    std::shared_ptr<SnapshotBuffer> snapshot_buffer{}; 
-    decltype(std::chrono::steady_clock::now()) last_snapshot_time{};
+    OrderBook order_book;
+    std::shared_ptr<SnapshotBuffer> snapshot_buffer; 
+    decltype(std::chrono::steady_clock::now()) last_snapshot_time;
 };  
 
 #endif

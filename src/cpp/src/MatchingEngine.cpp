@@ -1,10 +1,14 @@
 #include ".././include/lob/MatchingEngine.h"
 
+MatchingEngine::MatchingEngine(): order_book{}, snapshot_buffer{std::make_shared<SnapshotBuffer>()}, last_snapshot_time{} {}
+
 MatchResult MatchingEngine::handle_order(std::shared_ptr<Order> order) {
+    if (order->side == OrderSide::UNDEFINED) throw std::runtime_error("undefined order type");
+
     auto result = (order->side == OrderSide::BUY) ? handle_buy(std::move(order)) : handle_sell(std::move(order));
     auto now = std::chrono::steady_clock::now();
-    if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) < CONFIG::SNAPSHOT_PERIOD) {
-        push_snapshot(order_book.get_snapshot());
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) > CONFIG::SNAPSHOT_PERIOD) {
+        push_snapshot(std::move(order_book.get_snapshot()));
         last_snapshot_time = now;
     }
     return result;
@@ -93,9 +97,11 @@ SelfTradeCancellation MatchingEngine::handle_self_trade(std::shared_ptr<Order> a
 
 
 void MatchingEngine::push_snapshot(BookSnapshot snapshot) { 
-    snapshot_buffer->push(snapshot);
+    if (snapshot_buffer == nullptr) throw std::runtime_error("snapshot buffer is not init");
+    snapshot_buffer->push(std::move(snapshot));
 } 
 
 BookSnapshot MatchingEngine::pull_snapshot() {
+    if (snapshot_buffer == nullptr) throw std::runtime_error("snapshot buffer is not init");
     return snapshot_buffer->pull();
 }

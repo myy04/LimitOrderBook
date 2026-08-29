@@ -16,11 +16,12 @@ if __name__ == "__main__":
 
     for order in OrderGenerator():
         try:
-            order_gateway.submit_order_request(order)
+            result = order_gateway.submit_order_request(order)
         except lob.OrderException as e:
             continue
         except Exception as e:
-            print(e)
+            print("Exception:", e)
             break
+    
 
     cli_thread.join()

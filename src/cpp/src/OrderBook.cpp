@@ -62,7 +62,7 @@ BookSnapshot OrderBook::get_snapshot() {
         }
     }
     
-    snapshot.time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); 
+    snapshot.time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count(); 
     // to mimic python time.time()
 
     return snapshot;
