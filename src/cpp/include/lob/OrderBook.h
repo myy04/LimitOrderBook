@@ -2,6 +2,8 @@
 #define ORDER_BOOK_H
 
 #include "./Types.h"
+#include "./Config.h"
+
 #include <map>
 #include <unordered_map>
 #include <list>
@@ -16,7 +18,7 @@ public:
     void remove_order(std::shared_ptr<Order>) noexcept;
     std::shared_ptr<Order> peek_best_bid();
     std::shared_ptr<Order> peek_best_ask();
-    BookSnapshot get_snapshot(int depth);
+    BookSnapshot get_snapshot();
 
 private:
     std::map<int, std::list<std::shared_ptr<Order>>> bids;

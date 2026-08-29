@@ -33,7 +33,9 @@ std::shared_ptr<Order> OrderBook::peek_best_ask() {
     return *list.begin();
 }
 
-BookSnapshot OrderBook::get_snapshot(int depth) {
+BookSnapshot OrderBook::get_snapshot() {
+    const int depth = CONFIG::SNAPSHOT_DEPTH;
+
     BookSnapshot snapshot{};
 
     for (auto i = bids.rbegin(); i != bids.rend(); i++) {

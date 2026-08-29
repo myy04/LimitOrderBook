@@ -1,11 +1,13 @@
 #include ".././include/lob/MatchingEngine.h"
 
-MatchingEngine::MatchingEngine(std::shared_ptr<SnapshotBuffer> snapshot_buffer): 
-                                order_book{}, snapshot_buffer{snapshot_buffer} {}
-
 MatchResult MatchingEngine::handle_order(std::shared_ptr<Order> order) {
-    if (order->side == OrderSide::BUY) return handle_buy(std::move(order));
-    else return handle_sell(std::move(order));
+    auto result = (order->side == OrderSide::BUY) ? handle_buy(std::move(order)) : handle_sell(std::move(order));
+    auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) < CONFIG::SNAPSHOT_PERIOD) {
+        push_snapshot(order_book.get_snapshot());
+        last_snapshot_time = now;
+    }
+    return result;
 }
 
 std::vector<MatchResult> MatchingEngine::handle_orders(std::vector<std::shared_ptr<Order>> orders) {
@@ -90,7 +92,10 @@ SelfTradeCancellation MatchingEngine::handle_self_trade(std::shared_ptr<Order> a
 }
 
 
-void MatchingEngine::save_snapshot(int depth) {
-    BookSnapshot snapshot = order_book.get_snapshot(depth);
+void MatchingEngine::push_snapshot(BookSnapshot snapshot) { 
     snapshot_buffer->push(snapshot);
+} 
+
+BookSnapshot MatchingEngine::pull_snapshot() {
+    return snapshot_buffer->pull();
 }

@@ -70,23 +70,25 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def("peek_best_bid", &OrderBook::peek_best_bid)
         .def("peek_best_ask", &OrderBook::peek_best_ask);
 
-
     py::class_<BookSnapshot>(m, "BookSnapshot")
         .def(py::init<std::vector<Order>, std::vector<Order>, float>(),
-            py::arg("bids")
-            py::arg("asks")
+            py::arg("bids"),
+            py::arg("asks"),
+            py::arg("time")
         )    
         .def_readwrite("bids", &BookSnapshot::bids)
-        .def_readwrite("asks", &BookSnapshot::asks);
+        .def_readwrite("asks", &BookSnapshot::asks)
+        .def_readwrite("time", &BookSnapshot::time);
 
-    py::class_<SnapshotBuffer>(m, "SnapshotBuffer")
-        .def(py::init<>())
-        .def("push", &SnapshotBuffer::push, py::arg("snapshot"))
-        .def("pull", &SnapshotBuffer::pull);
+    // py::class_<SnapshotBuffer>(m, "SnapshotBuffer")
+    //     .def(py::init<>())
+    //     .def("push", &SnapshotBuffer::push, py::arg("snapshot"))
+    //     .def("pull", &SnapshotBuffer::pull);
 
     py::class_<MatchingEngine>(m, "MatchingEngine")
         .def(py::init<>())
-        .def("handle_order", &MatchingEngine::handle_order, py::arg("order"));
+        .def("handle_order", &MatchingEngine::handle_order, py::arg("order"))
+        .def("pull_snapshot", &MatchingEngine::pull_snapshot);
 };
 
 

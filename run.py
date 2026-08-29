@@ -8,7 +8,7 @@ from CLI import CLI
 import threading
 
 if __name__ == "__main__":
-    engine = lob.MatchingEngine()
+    engine = lob.cpp.MatchingEngine()
     order_gateway = lob.OrderGateway(engine=engine)
     cli = CLI(engine=engine)
     cli_thread = threading.Thread(target=cli.run, daemon=True)   
