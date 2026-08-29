@@ -17,7 +17,7 @@ class CLI:
 
         if not bids or not asks: return
 
-        spread = asks[0].price - bids[0].price 
+        spread = (asks[0].price - bids[0].price) * lob.PRICE_TICK_SIZE 
         
         os.system('clear')        
 
