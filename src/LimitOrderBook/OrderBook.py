@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from LimitOrderBook import SNAPSHOT_DEPTH
+
 from typing import Any
 
 
@@ -64,7 +67,9 @@ class OrderBook:
             return None
 
     
-    def get_snapshot(self, depth: int) -> BookSnapshot:
+    def get_snapshot(self) -> BookSnapshot:
+        depth = SNAPSHOT_DEPTH
+
         best_bids: list[Order] = []        
         for tree_index in range(1, depth + 1):
             try:

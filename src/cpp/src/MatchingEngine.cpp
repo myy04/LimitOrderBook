@@ -1,6 +1,7 @@
 #include ".././include/lob/MatchingEngine.h"
 
-MatchingEngine::MatchingEngine(): order_book{} {}
+MatchingEngine::MatchingEngine(std::shared_ptr<SnapshotBuffer> snapshot_buffer): 
+                                order_book{}, snapshot_buffer{snapshot_buffer} {}
 
 MatchResult MatchingEngine::handle_order(std::shared_ptr<Order> order) {
     if (order->side == OrderSide::BUY) return handle_buy(std::move(order));
@@ -90,5 +91,6 @@ SelfTradeCancellation MatchingEngine::handle_self_trade(std::shared_ptr<Order> a
 
 
 void MatchingEngine::save_snapshot(int depth) {
-    
+    BookSnapshot snapshot = order_book.get_snapshot(depth);
+    snapshot_buffer->push(snapshot);
 }

@@ -4,6 +4,7 @@
 #include "./include/lob/Types.h"
 #include "./include/lob/OrderBook.h"
 #include "./include/lob/MatchingEngine.h"
+#include "./include/lob/SnapshotBuffer.h"
 
 namespace py = pybind11;
 
@@ -69,6 +70,19 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def("peek_best_bid", &OrderBook::peek_best_bid)
         .def("peek_best_ask", &OrderBook::peek_best_ask);
 
+
+    py::class_<BookSnapshot>(m, "BookSnapshot")
+        .def(py::init<std::vector<Order>, std::vector<Order>, float>(),
+            py::arg("bids")
+            py::arg("asks")
+        )    
+        .def_readwrite("bids", &BookSnapshot::bids)
+        .def_readwrite("asks", &BookSnapshot::asks);
+
+    py::class_<SnapshotBuffer>(m, "SnapshotBuffer")
+        .def(py::init<>())
+        .def("push", &SnapshotBuffer::push, py::arg("snapshot"))
+        .def("pull", &SnapshotBuffer::pull);
 
     py::class_<MatchingEngine>(m, "MatchingEngine")
         .def(py::init<>())

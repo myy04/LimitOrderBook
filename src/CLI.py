@@ -2,12 +2,12 @@ import LimitOrderBook as lob
 import time, os
 
 class CLI:
-    def __init__(self, snapshot_buffer: lob.SnapshotBuffer):
-        self.snapshot_buffer = snapshot_buffer
+    def __init__(self, engine: lob.MatchingEngine | lob.cpp.MatchingEngine):
+        self.engine = engine
 
     def __consume_snapshot(self):
         try: 
-            snapshot: lob.BookSnapshot = self.snapshot_buffer.pull()
+            snapshot: lob.BookSnapshot = self.engine.pull_snapshot()
         except:
             return 
 

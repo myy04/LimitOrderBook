@@ -8,7 +8,7 @@ class SnapshotBuffer:
         self.buffer: queue.Queue[BookSnapshot] = queue.Queue()
 
     def pull(self) -> BookSnapshot:
-        return self.buffer.get()
+        return self.buffer.get_nowait()
 
     def push(self, snapshot: BookSnapshot) -> None:
         self.buffer.put(snapshot)

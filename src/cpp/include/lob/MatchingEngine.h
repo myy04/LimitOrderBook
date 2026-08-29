@@ -3,10 +3,11 @@
 
 #include "./Types.h"
 #include "./OrderBook.h"
+#include "./SnapshotBuffer.h"
 
 class MatchingEngine {  
 public: 
-    explicit MatchingEngine();
+    explicit MatchingEngine(std::shared_ptr<SnapshotBuffer> buffer);
     MatchResult handle_order(std::shared_ptr<Order> order); 
     std::vector<MatchResult> handle_orders(std::vector<std::shared_ptr<Order>> orders);
 private:
@@ -16,6 +17,7 @@ private:
     SelfTradeCancellation handle_self_trade(std::shared_ptr<Order> aggressor_order, std::shared_ptr<Order> resting_order);
 
     OrderBook order_book;
+    std::shared_ptr<SnapshotBuffer> snapshot_buffer; 
 };  
 
 #endif

@@ -12,9 +12,9 @@ from LimitOrderBook import SNAPSHOT_PERIOD, SNAPSHOT_DEPTH
 
 
 class MatchingEngine:
-    def __init__(self, snapshot_buffer: SnapshotBuffer = None):
+    def __init__(self):
         self.order_book = OrderBook()   
-        self.snapshot_buffer = snapshot_buffer if snapshot_buffer is not None else None
+        self.snapshot_buffer = SnapshotBuffer()
         self.last_snapshot_time: float = 0.0
 
     def handle_order(self, order: Order) -> MatchResult:
@@ -22,11 +22,16 @@ class MatchingEngine:
         else: result= self.__handle_sell(order)
 
         if self.snapshot_buffer is not None and time.time() - self.last_snapshot_time > SNAPSHOT_PERIOD:
-            self.__save_snapshot(SNAPSHOT_DEPTH)
+            self.__push_snapshot(self.order_book.get_snapshot())
             self.last_snapshot_time = time.time()
 
         return result
 
+    def pull_snapshot(self) -> BookSnapshot:
+        return self.snapshot_buffer.pull()   
+
+    def __push_snapshot(self, snapshot: BookSnapshot) -> None:
+        self.snapshot_buffer.push(snapshot)
 
     def __handle_buy(self, buy_order: Order) -> MatchResult:
         trades = []
@@ -95,7 +100,3 @@ class MatchingEngine:
             self.order_book.remove_order(resting_order)
 
         return cancel
-
-    def __save_snapshot(self, depth):
-        snapshot = self.order_book.get_snapshot(depth)
-        self.snapshot_buffer.push(snapshot)
