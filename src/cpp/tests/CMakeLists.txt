@@ -3,6 +3,7 @@ add_executable(lob_tests EXCLUDE_FROM_ALL
     MatchingEngine_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/OrderBook.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/MatchingEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/SnapshotBuffer.cpp
 )
 
 target_include_directories(lob_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
