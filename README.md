@@ -2,7 +2,7 @@
 
 This is my own implementation of Limit Order Book and Maching Engine in Python and C++. 
 
-![Screenshot](./images/gui_screenshot.png)
+![Screenshot](./images/cli_screenshot.png)
 
 ### Pipeline
 
