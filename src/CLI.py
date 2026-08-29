@@ -45,7 +45,7 @@ class CLI:
             print('-' * len(line))
 
         print("SPREAD:", spread)
-        # time.sleep(1)
+        time.sleep(0.5)
 
     def run(self):
         while True:

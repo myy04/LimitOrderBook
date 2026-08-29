@@ -5,7 +5,7 @@ from .DataTypes import BookSnapshot
 
 class SnapshotBuffer:
     def __init__(self):
-        self.buffer: queue.Queue[BookSnapshot] = queue.Queue()
+        self.buffer: queue.Queue[BookSnapshot] = queue.Queue(maxsize=1)
 
     def pull(self) -> BookSnapshot:
         return self.buffer.get_nowait()

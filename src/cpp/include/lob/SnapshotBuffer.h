@@ -7,12 +7,12 @@
 
 class SnapshotBuffer {
 public:
-    explicit SnapshotBuffer();
+    explicit SnapshotBuffer() = default;
     void push(BookSnapshot snapshot);
 
     BookSnapshot pull();
 private:    
-    std::queue<BookSnapshot> buffer;
+    BookSnapshot last_snapshot;
     std::mutex mutex_lock;
 };
 

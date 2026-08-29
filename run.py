@@ -1,36 +1,35 @@
-import LimitOrderBook as lob
-
-from OrderGenerator import OrderGenerator
-
-import LimitOrderBook as lob
-from CLI import CLI
-
 import threading
-import sys, time
+import sys, time, os
+import LimitOrderBook as lob
+from OrderGenerator import OrderGenerator
+from CLI import CLI
 
 if __name__ == "__main__":
     arg = str(sys.argv[1])
-
     engine = lob.cpp.MatchingEngine() if arg == "cpp" else lob.MatchingEngine()
-
-    if arg == "cpp": print("CPP Engine")
-    else: print("Python Engine")
-    time.sleep(2)
-
 
     order_gateway = lob.OrderGateway(engine=engine)
     cli = CLI(engine=engine)
-    cli_thread = threading.Thread(target=cli.run, daemon=True)   
+    cli_thread = threading.Thread(target=cli.run, daemon=True)
     cli_thread.start()
 
-    for order in OrderGenerator():
-        try:
-            order_gateway.submit_order_request(order)
-        except lob.OrderException as e:
-            continue
-        except Exception as e:
-            print("Exception:", e)
-            break
-    
+    num_trades = 0
+    start_time = time.perf_counter()
 
-    cli_thread.join()
+    try:
+        for order in OrderGenerator():
+            try:
+                result = order_gateway.submit_order_request(order)
+                num_trades += len(result.trades) + len(result.cancellations)
+            except lob.OrderException:
+                continue
+
+    except KeyboardInterrupt:
+        print("\nInterrupted by user (Ctrl+C)")
+    finally:
+        pass
+
+    runtime = time.perf_counter() - start_time
+    print("Trades done:", num_trades)
+    print("Runtime: ", runtime)
+    print("Trades per second:", num_trades / runtime)
