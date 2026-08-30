@@ -75,4 +75,6 @@ chmod +x test.sh
 ./test.sh py       # Run Python tests only
 ```
 
+## CLI Screenshot
+
 ![CLI Screenshot](./images/cli_screenshot.png)
