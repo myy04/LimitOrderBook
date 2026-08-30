@@ -5,8 +5,18 @@ from OrderGenerator import OrderGenerator
 from CLI import CLI
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Invalid argument")
+        exit(0) 
+
     arg = str(sys.argv[1])
-    engine = lob.cpp.MatchingEngine() if arg == "cpp" else lob.MatchingEngine()
+    if arg == "cpp":
+        engine = lob.cpp.MatchingEngine()
+    elif arg == "py":
+        engine = lob.MatchingEngine()
+    else:
+        print("Invalid argument")
+        exit(0)
 
     order_gateway = lob.OrderGateway(engine=engine)
     cli = CLI(engine=engine)
