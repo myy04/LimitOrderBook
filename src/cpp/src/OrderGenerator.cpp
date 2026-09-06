@@ -1,8 +1,8 @@
 #include "../include/lob/OrderGenerator.h"
 
 OrderGenerator::OrderGenerator(int seed): gen(seed), 
-                                    price_dist(2000, price_sd), 
-                                    volume_dist(1000, volume_sd),
+                                    price_dist(100, price_sd), 
+                                    volume_dist(100, volume_sd),
                                     side_dist(0, 1),
                                     mpid_dist(size_t(0), (MP_IDENTIFIERS_NUM) - 1)
 {
@@ -20,7 +20,7 @@ OrderGateway::OrderRequest OrderGenerator::generate_order() {
 }
 
 price_t OrderGenerator::generate_price() {
-    last_price = price_dist(gen);
+    last_price = std::round(price_dist(gen) / CONFIG::PRICE_TICK_SIZE) * CONFIG::PRICE_TICK_SIZE;
     price_dist = std::normal_distribution<float>(last_price, price_sd);
     return last_price;
 }

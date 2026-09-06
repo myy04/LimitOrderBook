@@ -20,6 +20,7 @@ std::shared_ptr<Order> OrderGateway::create_order(const OrderRequest& order_requ
 
 Order::price_t OrderGateway::convert_price(decltype(OrderGateway::OrderRequest::price) orig_price) {
     if (orig_price < CONFIG::MIN_PRICE || orig_price > CONFIG::MAX_PRICE) throw GatewayException("Price is out of range");  
-    if (std::fmod(orig_price, CONFIG::PRICE_TICK_SIZE) > CONFIG::EPS) throw GatewayException("Price is not divisable by tick size");
+    decltype(OrderGateway::OrderRequest::price) nearest_tick = std::round(orig_price / CONFIG::PRICE_TICK_SIZE) * CONFIG::PRICE_TICK_SIZE;
+    if (std::abs(orig_price - nearest_tick) > CONFIG::EPS) throw GatewayException("Price is not divisible by tick size");
     return std::round(orig_price / CONFIG::PRICE_TICK_SIZE);
 }

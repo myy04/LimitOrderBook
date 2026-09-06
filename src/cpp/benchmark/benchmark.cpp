@@ -11,7 +11,8 @@ static void BM_1000Orders(benchmark::State& state) {
     auto engine = std::make_shared<MatchingEngine>();
     auto gateway = std::make_unique<OrderGateway>(engine);
     auto generator = OrderGenerator{2};
-    
+
+
     std::array<OrderGateway::OrderRequest, 1000> orders;
     for (size_t i = 0; i < orders.size(); i++) {
         orders[i] = generator.generate_order();
@@ -19,7 +20,7 @@ static void BM_1000Orders(benchmark::State& state) {
 
     for (auto _ : state) {
         engine->reset(); 
-        
+
         for (const auto& request : orders) {
             try {
                 gateway->submit_order(request);
@@ -27,7 +28,7 @@ static void BM_1000Orders(benchmark::State& state) {
             }
         }
     }
-    
+
     state.SetItemsProcessed(state.iterations() * 1000);
 }
 

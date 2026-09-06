@@ -24,7 +24,7 @@ public:
 private:
     std::map<int, std::list<std::shared_ptr<Order>>> bids;
     std::map<int, std::list<std::shared_ptr<Order>>> asks;
-    std::map<int, std::list<std::shared_ptr<Order>>::iterator> nodes; 
+    std::unordered_map<int, std::list<std::shared_ptr<Order>>::iterator> nodes; 
 };
 
 
