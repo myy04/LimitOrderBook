@@ -1,0 +1,25 @@
+#include "../include/lob/OrderGateway.h"
+
+MatchResult OrderGateway::submit_order(OrderRequest ord) {
+    return engine->handle_order(create_order(ord));
+}
+
+std::shared_ptr<Order> OrderGateway::create_order(const OrderRequest& order_request) {
+    if (order_request.side == OrderSide::UNDEFINED) throw GatewayException("Order side is undefined");
+    Order::price_t converted_price = convert_price(order_request.price);
+    
+    Order order{};
+    order.price = converted_price;
+    order.volume = order_request.volume;
+    order.order_id = ++order_counter;
+    order.trader_id = order_request.trader_id;
+    order.timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+    return std::make_shared<Order>(std::move(order)); 
+}
+
+Order::price_t OrderGateway::convert_price(decltype(OrderGateway::OrderRequest::price) orig_price) {
+    if (orig_price < CONFIG::MIN_PRICE || orig_price > CONFIG::MAX_PRICE) throw GatewayException("Price is out of range");  
+    if (std::fmod(orig_price, CONFIG::PRICE_TICK_SIZE) > CONFIG::EPS) throw GatewayException("Price is not divisable by tick size");
+    return std::round(orig_price / CONFIG::PRICE_TICK_SIZE);
+}

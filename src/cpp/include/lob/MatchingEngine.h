@@ -15,6 +15,9 @@ public:
     MatchResult handle_order(std::shared_ptr<Order> order); 
     std::vector<MatchResult> handle_orders(std::vector<std::shared_ptr<Order>> orders);
 
+    void reset();
+
+
     BookSnapshot pull_snapshot();
 
 private:

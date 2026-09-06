@@ -1,20 +1,21 @@
 #include ".././include/lob/OrderBook.h"
 
+#include <cassert>
+
 OrderBook::OrderBook(): bids{}, asks{}, nodes{} {}
 
-void OrderBook::insert_order(std::shared_ptr<Order> order) noexcept {
+void OrderBook::insert_order(std::shared_ptr<Order> order) {
     auto& tree = (order->side == OrderSide::BUY) ? bids : asks;
-    if (tree.find(order->price) == tree.end()) tree[order->price] = {};
     auto& list = tree[order->price];
     list.push_back(order);
     nodes[order->order_id] = --list.end();
 }  
 
-void OrderBook::remove_order(std::shared_ptr<Order> order) noexcept {
-    if (nodes.find(order->order_id) == nodes.end()) return;
+void OrderBook::remove_order(std::shared_ptr<Order> order) {
+    if (nodes.find(order->order_id) == nodes.end()) throw "order does not exist in the orderbook";
     auto& tree = (order->side == OrderSide::BUY) ? bids : asks;
-    auto& list = tree[order->price];
-    auto& node = nodes[order->order_id];
+    auto& list = tree.at(order->price);
+    auto& node = nodes.at(order->order_id);
     list.erase(node);
     nodes.erase(order->order_id);
 
@@ -22,14 +23,14 @@ void OrderBook::remove_order(std::shared_ptr<Order> order) noexcept {
 }
 
 std::shared_ptr<Order> OrderBook::peek_best_bid() {         
-    if (bids.empty()) return nullptr;
-    auto& list = bids.rbegin()->second;
+    if (bids.empty()) throw "no bids";
+    auto list = bids.rbegin()->second; 
     return *list.begin();
 }
 
 std::shared_ptr<Order> OrderBook::peek_best_ask() { 
-    if (asks.empty()) return nullptr;
-    auto& list = asks.begin()->second;
+    if (asks.empty()) throw "no asks";
+    auto list = asks.begin()->second;
     return *list.begin();
 }
 

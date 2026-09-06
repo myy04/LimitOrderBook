@@ -15,8 +15,8 @@ class OrderBook {
 public:
     explicit OrderBook();    
 
-    void insert_order(std::shared_ptr<Order>) noexcept;
-    void remove_order(std::shared_ptr<Order>) noexcept;
+    void insert_order(std::shared_ptr<Order>);
+    void remove_order(std::shared_ptr<Order>);
     std::shared_ptr<Order> peek_best_bid();
     std::shared_ptr<Order> peek_best_ask();
     BookSnapshot get_snapshot();
@@ -24,7 +24,7 @@ public:
 private:
     std::map<int, std::list<std::shared_ptr<Order>>> bids;
     std::map<int, std::list<std::shared_ptr<Order>>> asks;
-    std::unordered_map<int, std::list<std::shared_ptr<Order>>::iterator> nodes; 
+    std::map<int, std::list<std::shared_ptr<Order>>::iterator> nodes; 
 };
 
 
