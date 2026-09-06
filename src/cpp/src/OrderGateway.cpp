@@ -24,3 +24,12 @@ Order::price_t OrderGateway::convert_price(decltype(OrderGateway::OrderRequest::
     if (std::abs(orig_price - nearest_tick) > CONFIG::EPS) throw GatewayException("Price is not divisible by tick size");
     return std::round(orig_price / CONFIG::PRICE_TICK_SIZE);
 }
+
+bool OrderGateway::is_order_valid(OrderRequest req) {
+    try {
+        convert_price(req.price);
+        if (req.volume < CONFIG::MIN_VOLUME || req.volume > CONFIG::MAX_VOLUME) return false;
+    } catch (const GatewayException&) {
+        return false;
+    }
+}

@@ -22,11 +22,12 @@ public:
     explicit OrderGateway(std::shared_ptr<MatchingEngine> engine): engine{engine} {}
 
     MatchResult submit_order(OrderRequest order);
+    static bool is_order_valid(OrderRequest req);
 private:    
     std::shared_ptr<Order> create_order(const OrderRequest& order_request);
     std::shared_ptr<MatchingEngine> engine;
 
-    Order::price_t convert_price(decltype(OrderGateway::OrderRequest::price));
+    static Order::price_t convert_price(decltype(OrderGateway::OrderRequest::price));
 
     static inline size_t order_counter = 0; 
 };

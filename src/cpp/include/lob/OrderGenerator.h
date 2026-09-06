@@ -46,8 +46,8 @@ private:
     side_t generate_side();
     mpid_t generate_mpid();
 
-    inline const static price_t price_sd = 10;   
-    inline const static volume_t volume_sd = 10;
+    inline const static price_t price_sd = 100;   
+    inline const static volume_t volume_sd = 100;
 
     price_t last_price;
     volume_t last_volume;

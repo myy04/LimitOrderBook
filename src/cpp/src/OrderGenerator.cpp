@@ -1,8 +1,8 @@
 #include "../include/lob/OrderGenerator.h"
 
 OrderGenerator::OrderGenerator(int seed): gen(seed), 
-                                    price_dist(100, price_sd), 
-                                    volume_dist(100, volume_sd),
+                                    price_dist(10000, price_sd), 
+                                    volume_dist(10000, volume_sd),
                                     side_dist(0, 1),
                                     mpid_dist(size_t(0), (MP_IDENTIFIERS_NUM) - 1)
 {
@@ -12,10 +12,13 @@ OrderGenerator::OrderGenerator(int seed): gen(seed),
 
 OrderGateway::OrderRequest OrderGenerator::generate_order() {
     OrderGateway::OrderRequest ord;
-    ord.price = generate_price();
-    ord.volume = generate_volume();
-    ord.side = generate_side();
-    ord.trader_id = generate_mpid();
+    while (true) {
+        ord.price = generate_price();
+        ord.volume = generate_volume();
+        ord.side = generate_side();
+        ord.trader_id = generate_mpid();
+        if (OrderGateway::is_order_valid(ord)) break;
+    }
     return ord;
 }
 

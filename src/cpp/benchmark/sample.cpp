@@ -12,7 +12,7 @@ int main() {
     auto generator = OrderGenerator{2};
 
 
-    std::array<OrderGateway::OrderRequest, 10> orders;
+    std::array<OrderGateway::OrderRequest, 1000> orders;
     for (size_t i = 0; i < orders.size(); i++) {
         orders[i] = generator.generate_order();
     }
