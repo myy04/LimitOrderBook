@@ -53,7 +53,7 @@ static void BM_10000_Orders(benchmark::State& state) {
         }
     }
 
-    state.SetItemsProcessed(state.iterations() * 1000);
+    state.SetItemsProcessed(state.iterations() * 10000);
 }
 
 static void BM_100000_Orders(benchmark::State& state) {
@@ -78,7 +78,7 @@ static void BM_100000_Orders(benchmark::State& state) {
         }
     }
 
-    state.SetItemsProcessed(state.iterations() * 1000);
+    state.SetItemsProcessed(state.iterations() * 100000);
 }
 
 BENCHMARK(BM_1000_Orders);
