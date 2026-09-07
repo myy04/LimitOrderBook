@@ -2,8 +2,8 @@
 
 MatchingEngine::MatchingEngine(): order_book{}, snapshot_buffer{std::make_shared<SnapshotBuffer>()}, last_snapshot_time{} {}
 
-MatchResult MatchingEngine::handle_order(const std::shared_ptr<Order>& order) {
-    auto result = (order->side == OrderSide::BUY) ? handle_buy(std::move(order)) : handle_sell(std::move(order));
+MatchResult MatchingEngine::handle_order(Order&& order) {
+    auto result = (order.side == OrderSide::BUY) ? handle_buy(order) : handle_sell(order);
 
     if constexpr (CONFIG::CAPTURE_SNAPSHOTS) {
         auto now = std::chrono::steady_clock::now();
@@ -23,84 +23,83 @@ MatchResult MatchingEngine::handle_order(const std::shared_ptr<Order>& order) {
         std::cout << '\n';
     }
 
-
     return result;
 }
 
-MatchResult MatchingEngine::handle_buy(const std::shared_ptr<Order>& order) {
+MatchResult MatchingEngine::handle_buy(Order& order) {
     MatchResult ret{};
 
     try {
-        while (order->volume > 0) {
+        while (order.volume > 0) {
             auto best_ask = order_book.peek_best_ask();
-            if (best_ask->price > order->price) break;
+            if (best_ask.price > order.price) break;
             
-            if (best_ask->trader_id == order->trader_id) {
+            if (best_ask.trader_id == order.trader_id) {
                 ret.cancellations.emplace_back(handle_self_trade(order, best_ask));
                 continue;  
             }
 
             Trade trade{};
-            trade.volume = std::min(order->volume, best_ask->volume);
-            trade.price = best_ask->price;
-            trade.aggressor_order = *order;
-            trade.resting_order = *best_ask;
+            trade.volume = std::min(order.volume, best_ask.volume);
+            trade.price = best_ask.price;
+            trade.aggressor_order_id = order.order_id;
+            trade.resting_order_id = best_ask.order_id;
 
-            order->volume -= trade.volume;
-            best_ask->volume -= trade.volume;   
-            if (best_ask->volume == 0) order_book.remove_order(best_ask);
+            order.volume -= trade.volume;
+            best_ask.volume -= trade.volume;   
+            if (best_ask.volume == 0) order_book.remove_order(best_ask);
 
             ret.trades.emplace_back(std::move(trade));
         }
     } catch (...) {}
 
-    if (order->volume > 0) order_book.insert_order(order);
+    if (order.volume > 0) order_book.insert_order(std::move(order));
     return ret;
 }
 
 
-MatchResult MatchingEngine::handle_sell(const std::shared_ptr<Order>& order) {
+MatchResult MatchingEngine::handle_sell(Order& order) {
     MatchResult ret{};
 
     try {
-        while (order->volume > 0) {
+        while (order.volume > 0) {
             auto best_bid = order_book.peek_best_bid();
             
-            if (best_bid->price < order->price) break;
+            if (best_bid.price < order.price) break;
             
-            if (best_bid->trader_id == order->trader_id) {
+            if (best_bid.trader_id == order.trader_id) {
                 ret.cancellations.emplace_back(handle_self_trade(order, best_bid));
                 continue;  
             }
 
             Trade trade{};
-            trade.volume = std::min(order->volume, best_bid->volume);
-            trade.price = best_bid->price;
-            trade.aggressor_order = *order;
-            trade.resting_order = *best_bid;
+            trade.volume = std::min(order.volume, best_bid.volume);
+            trade.price = best_bid.price;
+            trade.aggressor_order_id = order.order_id;
+            trade.resting_order_id = best_bid.order_id;
 
-            order->volume -= trade.volume;
-            best_bid->volume -= trade.volume;   
-            if (best_bid->volume == 0) order_book.remove_order(best_bid);
+            order.volume -= trade.volume;
+            best_bid.volume -= trade.volume;   
+            if (best_bid.volume == 0) order_book.remove_order(best_bid);
 
             ret.trades.emplace_back(std::move(trade));
         }
     } catch (...) {}
 
-    if (order->volume > 0) order_book.insert_order(order);
+    if (order.volume > 0) order_book.insert_order(std::move(order));
     return ret;
 }
 
 
-SelfTradeCancellation MatchingEngine::handle_self_trade(const std::shared_ptr<Order>& aggressor_order, const std::shared_ptr<Order>& resting_order) {
+SelfTradeCancellation MatchingEngine::handle_self_trade(Order& aggressor_order, Order& resting_order) {
     SelfTradeCancellation cancel{};
-    cancel.volume = std::min(aggressor_order->volume, resting_order->volume);
-    cancel.price = resting_order->price;
-    cancel.resting_order = *resting_order;
-    cancel.aggressor_order = *aggressor_order;
-    resting_order->volume -= cancel.volume;
-    aggressor_order->volume -= cancel.volume;
-    if (resting_order->volume == 0) order_book.remove_order(resting_order);
+    cancel.volume = std::min(aggressor_order.volume, resting_order.volume);
+    cancel.price = resting_order.price;
+    cancel.resting_order_id = resting_order.order_id;
+    cancel.aggressor_order_id = aggressor_order.order_id;
+    resting_order.volume -= cancel.volume;
+    aggressor_order.volume -= cancel.volume;
+    if (resting_order.volume == 0) order_book.remove_order(resting_order);
     return cancel;
 }
 

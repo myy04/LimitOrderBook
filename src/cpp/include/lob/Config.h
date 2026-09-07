@@ -16,9 +16,9 @@ namespace CONFIG {
 
     const float EPS = 1e-9; 
 
-    constexpr bool CAPTURE_SNAPSHOTS = false;
+    constexpr bool CAPTURE_SNAPSHOTS = true;
 
-    constexpr bool DEBUG_OUTPUT = true;
+    constexpr bool DEBUG_OUTPUT = false;
 }   
 
 #endif

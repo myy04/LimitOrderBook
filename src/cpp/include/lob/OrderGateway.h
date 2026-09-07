@@ -24,7 +24,7 @@ public:
     MatchResult submit_order(OrderRequest order);
     static bool is_order_valid(OrderRequest req);
 private:    
-    std::shared_ptr<Order> create_order(const OrderRequest& order_request);
+    Order create_order(const OrderRequest& order_request);
     std::shared_ptr<MatchingEngine> engine;
 
     static Order::price_t convert_price(decltype(OrderGateway::OrderRequest::price));

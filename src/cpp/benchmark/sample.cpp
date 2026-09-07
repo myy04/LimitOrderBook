@@ -24,16 +24,16 @@ int main() {
 
         for (const auto& trade : trades) {
             std::cout << "Trade:\n";
-            std::cout << "Resting Order: " << trade.resting_order << '\n';
-            std::cout << "Agressor Order: " << trade.aggressor_order << '\n';
+            std::cout << "Resting Order: " << trade.resting_order_id << '\n';
+            std::cout << "Agressor Order: " << trade.aggressor_order_id << '\n';
             std::cout << "Price: " << trade.price << '\n';
             std::cout << "Volume: " << trade.volume << '\n';
         }
 
         for (const auto& cancel : cancellations) {
             std::cout << "Self Cancellation:\n";
-            std::cout << "Resting Order: " << cancel.resting_order << '\n';
-            std::cout << "Agressor Order: " << cancel.aggressor_order << '\n';
+            std::cout << "Resting Order: " << cancel.resting_order_id << '\n';
+            std::cout << "Agressor Order: " << cancel.aggressor_order_id << '\n';
             std::cout << "Price: " << cancel.price << '\n';
             std::cout << "Volume: " << cancel.volume << '\n';
         }

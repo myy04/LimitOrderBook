@@ -1,18 +1,19 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "Config.h"
+
 #include <string>
 #include <vector>
 #include <iostream>
 #include <chrono>
 
-enum class OrderSide {BUY, SELL, UNDEFINED};
+enum class OrderSide : uint8_t {BUY, SELL};
 
 inline std::ostream& operator<<(std::ostream& os, OrderSide side) {
     switch (side) {
         case OrderSide::BUY: return os << "BUY";
         case OrderSide::SELL: return os << "SELL";
-        case OrderSide::UNDEFINED: return os << "UNDEFINED";
     }
 }
 
@@ -42,12 +43,12 @@ inline std::ostream& operator<<(std::ostream& os, const Mpid& id) {
 } 
 
 struct Order {
-    OrderSide side;
-    size_t price;
-    size_t volume;
-    size_t order_id;
-    Mpid trader_id;
-    std::chrono::milliseconds timestamp;
+    uint64_t price; // 8 byte
+    uint64_t volume; // 8 byte
+    uint64_t order_id; // 8 byte
+    uint64_t timestamp; //ns 8 byte
+    Mpid trader_id; // 4 byte
+    OrderSide side; // 1 byte
 
     using side_t = decltype(side);
     using price_t = decltype(price);
@@ -58,21 +59,21 @@ struct Order {
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Order& ord) {
-    return os << ord.trader_id << ' ' << ord.side << ' ' << ord.price << ' ' << ord.volume << ' ' << ord.timestamp.count() << ' ' << ord.order_id;
+    return os << ord.trader_id << ' ' << ord.side << ' ' << ord.price * CONFIG::PRICE_TICK_SIZE << ' ' << ord.volume << ' ' << ord.timestamp << ' ' << ord.order_id;
 }
 
 struct Trade {
-    Order aggressor_order;
-    Order resting_order;
+    Order::order_id_t aggressor_order_id;
+    Order::order_id_t resting_order_id;
     int price;
     int volume;
 };
 
 struct SelfTradeCancellation {
-    Order aggressor_order;
-    Order resting_order;
-    int volume;
+    Order::order_id_t aggressor_order_id;
+    Order::order_id_t resting_order_id;
     int price;
+    int volume;
 };
 
 struct MatchResult {

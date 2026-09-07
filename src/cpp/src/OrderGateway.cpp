@@ -4,8 +4,7 @@ MatchResult OrderGateway::submit_order(OrderRequest ord) {
     return engine->handle_order(create_order(ord));
 }
 
-std::shared_ptr<Order> OrderGateway::create_order(const OrderRequest& order_request) {
-    if (order_request.side == OrderSide::UNDEFINED) throw GatewayException("Order side is undefined");
+Order OrderGateway::create_order(const OrderRequest& order_request) {
     Order::price_t converted_price = convert_price(order_request.price);
     
     Order order{};
@@ -14,9 +13,9 @@ std::shared_ptr<Order> OrderGateway::create_order(const OrderRequest& order_requ
     order.volume = order_request.volume;
     order.order_id = ++order_counter;
     order.trader_id = order_request.trader_id;
-    order.timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    order.timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
-    return std::make_shared<Order>(std::move(order)); 
+    return order; 
 }
 
 Order::price_t OrderGateway::convert_price(decltype(OrderGateway::OrderRequest::price) orig_price) {

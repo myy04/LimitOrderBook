@@ -24,3 +24,4 @@ add_library(lob_core STATIC
 target_include_directories(lob_core PUBLIC ./include)
 
 add_subdirectory(./benchmark)
+add_subdirectory(./cli)
