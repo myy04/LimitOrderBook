@@ -5,19 +5,7 @@ from OrderGenerator import OrderGenerator
 from CLI import CLI
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Invalid argument")
-        exit(0) 
-
-    arg = str(sys.argv[1])
-    if arg == "cpp":
-        engine = lob.cpp.MatchingEngine()
-    elif arg == "py":
-        engine = lob.MatchingEngine()
-    else:
-        print("Invalid argument")
-        exit(0)
-
+    engine = lob.MatchingEngine()
     order_gateway = lob.OrderGateway(engine=engine)
     cli = CLI(engine=engine)
     cli_thread = threading.Thread(target=cli.run, daemon=True)
