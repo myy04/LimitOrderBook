@@ -15,11 +15,13 @@ class OrderBook {
 public:
     explicit OrderBook();    
 
-    void insert_order(std::shared_ptr<Order>);
-    void remove_order(std::shared_ptr<Order>);
+    void insert_order(const std::shared_ptr<Order>&);
+    void remove_order(const std::shared_ptr<Order>&);
     std::shared_ptr<Order> peek_best_bid();
     std::shared_ptr<Order> peek_best_ask();
     BookSnapshot get_snapshot();
+
+    void print_orderbook();
 
 private:
     std::map<int, std::list<std::shared_ptr<Order>>> bids;

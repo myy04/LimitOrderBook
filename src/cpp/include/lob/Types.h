@@ -21,7 +21,7 @@ struct Mpid {
 
     Mpid(): tag{0} {}
 
-    Mpid(const char* s): tag{0} {
+    Mpid(const char* s) : tag{0} {
         for (int i = 0; i < 4; i++) {
             tag <<= 8;
             tag |= static_cast<uint32_t>(s[i]);
@@ -31,12 +31,13 @@ struct Mpid {
     const bool operator==(const Mpid& other) const {return tag == other.tag;}
 };
 
-inline std::ostream& operator<<(std::ostream& os, Mpid id) {    
+inline std::ostream& operator<<(std::ostream& os, const Mpid& id) {    
     char s[5];
-    s[0] = static_cast<char>((id.tag >> 24) & 0xFF);  // 'C'
-    s[1] = static_cast<char>((id.tag >> 16) & 0xFF);  // 'D'
-    s[2] = static_cast<char>((id.tag >>  8) & 0xFF);  // 'E'
-    s[3] = static_cast<char>( id.tag        & 0xFF);  // 'L'
+    s[0] = static_cast<char>((id.tag >> 24) & 0xFF); 
+    s[1] = static_cast<char>((id.tag >> 16) & 0xFF);
+    s[2] = static_cast<char>((id.tag >>  8) & 0xFF);
+    s[3] = static_cast<char>( id.tag        & 0xFF);
+    s[4] = '\0';
     return os << s;
 } 
 
@@ -55,6 +56,10 @@ struct Order {
     using trader_id_t = decltype(trader_id);
     using timestamp_t = decltype(timestamp);
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Order& ord) {
+    return os << ord.trader_id << ' ' << ord.side << ' ' << ord.price << ' ' << ord.volume << ' ' << ord.timestamp.count() << ' ' << ord.order_id;
+}
 
 struct Trade {
     Order aggressor_order;

@@ -2,28 +2,32 @@
 
 MatchingEngine::MatchingEngine(): order_book{}, snapshot_buffer{std::make_shared<SnapshotBuffer>()}, last_snapshot_time{} {}
 
-MatchResult MatchingEngine::handle_order(std::shared_ptr<Order> order) {
+MatchResult MatchingEngine::handle_order(const std::shared_ptr<Order>& order) {
     auto result = (order->side == OrderSide::BUY) ? handle_buy(std::move(order)) : handle_sell(std::move(order));
-    auto now = std::chrono::steady_clock::now();
-    if (CONFIG::CAPTURE_SNAPSHOTS) {
+
+    if constexpr (CONFIG::CAPTURE_SNAPSHOTS) {
+        auto now = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) > CONFIG::SNAPSHOT_PERIOD) {
             push_snapshot(std::move(order_book.get_snapshot()));
             last_snapshot_time = now;
         }
     }
+    
+    if constexpr (CONFIG::DEBUG_OUTPUT) {
+        std::cout << '\n';
+        for (int i = 1; i <= 100; i++) std::cout << '-';
+        std::cout << '\n';
+        order_book.print_orderbook();
+        std::cout << '\n';
+        for (int i = 1; i <= 100; i++) std::cout << '-';
+        std::cout << '\n';
+    }
+
+
     return result;
 }
 
-std::vector<MatchResult> MatchingEngine::handle_orders(std::vector<std::shared_ptr<Order>> orders) {
-    std::vector<MatchResult> results{orders.size(), MatchResult{}};
-    for (int order_idx = 0; order_idx < orders.size(); order_idx++) {
-        auto& order = orders[order_idx];
-        results[order_idx] = handle_order(order); 
-    }
-    return results;
-}
-
-MatchResult MatchingEngine::handle_buy(std::shared_ptr<Order> order) {
+MatchResult MatchingEngine::handle_buy(const std::shared_ptr<Order>& order) {
     MatchResult ret{};
 
     try {
@@ -50,12 +54,12 @@ MatchResult MatchingEngine::handle_buy(std::shared_ptr<Order> order) {
         }
     } catch (...) {}
 
-    if (order->volume > 0) order_book.insert_order(std::move(order));
+    if (order->volume > 0) order_book.insert_order(order);
     return ret;
 }
 
 
-MatchResult MatchingEngine::handle_sell(std::shared_ptr<Order> order) {
+MatchResult MatchingEngine::handle_sell(const std::shared_ptr<Order>& order) {
     MatchResult ret{};
 
     try {
@@ -83,12 +87,12 @@ MatchResult MatchingEngine::handle_sell(std::shared_ptr<Order> order) {
         }
     } catch (...) {}
 
-    if (order->volume > 0) order_book.insert_order(std::move(order));
+    if (order->volume > 0) order_book.insert_order(order);
     return ret;
 }
 
 
-SelfTradeCancellation MatchingEngine::handle_self_trade(std::shared_ptr<Order> aggressor_order, std::shared_ptr<Order> resting_order) {
+SelfTradeCancellation MatchingEngine::handle_self_trade(const std::shared_ptr<Order>& aggressor_order, const std::shared_ptr<Order>& resting_order) {
     SelfTradeCancellation cancel{};
     cancel.volume = std::min(aggressor_order->volume, resting_order->volume);
     cancel.price = resting_order->price;

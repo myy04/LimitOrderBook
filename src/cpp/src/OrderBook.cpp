@@ -4,14 +4,14 @@
 
 OrderBook::OrderBook(): bids{}, asks{}, nodes{} {}
 
-void OrderBook::insert_order(std::shared_ptr<Order> order) {
+void OrderBook::insert_order(const std::shared_ptr<Order>& order) {
     auto& tree = (order->side == OrderSide::BUY) ? bids : asks;
     auto& list = tree[order->price];
     list.push_back(order);
     nodes[order->order_id] = --list.end();
 }  
 
-void OrderBook::remove_order(std::shared_ptr<Order> order) {
+void OrderBook::remove_order(const std::shared_ptr<Order>& order) {
     if (nodes.find(order->order_id) == nodes.end()) throw "order does not exist in the orderbook";
     auto& tree = (order->side == OrderSide::BUY) ? bids : asks;
     auto& list = tree.at(order->price);
@@ -72,4 +72,23 @@ BookSnapshot OrderBook::get_snapshot() {
     snapshot.time = time_str;
 
     return snapshot;
+}
+
+
+void OrderBook::print_orderbook() {
+    std::cout << "Bids:\n";
+    for (const auto& [price, bid_list] : bids) {
+        std::cout << "PRICE: " << price << "\n";
+        for (const auto& bid : bid_list) {
+            std::cout << *bid << '\n';
+        }
+    }
+
+    std::cout << "Asks:\n";
+    for (const auto& [price, ask_list] : asks) {
+        std::cout << "PRICE: " << price << "\n";
+        for (const auto& ask : ask_list) {
+            std::cout << *ask << '\n';
+        }
+    }
 }

@@ -9,6 +9,7 @@ std::shared_ptr<Order> OrderGateway::create_order(const OrderRequest& order_requ
     Order::price_t converted_price = convert_price(order_request.price);
     
     Order order{};
+    order.side = order_request.side;
     order.price = converted_price;
     order.volume = order_request.volume;
     order.order_id = ++order_counter;

@@ -11,19 +11,31 @@ int main() {
     auto gateway = std::make_unique<OrderGateway>(engine);
     auto generator = OrderGenerator{2};
 
-    std::array<OrderGateway::OrderRequest, 1000> orders;
+    std::array<OrderGateway::OrderRequest, 20> orders;
     for (size_t i = 0; i < orders.size(); i++) {
         orders[i] = generator.generate_order();
     }
 
     for (const auto& request : orders) {
-        std::cout << request.trader_id << ' ' << request.side << ' ' << request.price << ' ' << request.volume << ' ';
+        std::cout << "Order: " << request.trader_id << ' ' << request.side << ' ' << request.price << ' ' << request.volume << ' ';
+        MatchResult result = gateway->submit_order(request);
+        const auto& trades = result.trades;  
+        const auto& cancellations = result.cancellations;
 
-        try {
-            gateway->submit_order(request);
-            std::cout << "VALID\n";
-        } catch (const GatewayException& e) {
-            std::cout << "INVALID " << e.what() << '\n';
+        for (const auto& trade : trades) {
+            std::cout << "Trade:\n";
+            std::cout << "Resting Order: " << trade.resting_order << '\n';
+            std::cout << "Agressor Order: " << trade.aggressor_order << '\n';
+            std::cout << "Price: " << trade.price << '\n';
+            std::cout << "Volume: " << trade.volume << '\n';
+        }
+
+        for (const auto& cancel : cancellations) {
+            std::cout << "Self Cancellation:\n";
+            std::cout << "Resting Order: " << cancel.resting_order << '\n';
+            std::cout << "Agressor Order: " << cancel.aggressor_order << '\n';
+            std::cout << "Price: " << cancel.price << '\n';
+            std::cout << "Volume: " << cancel.volume << '\n';
         }
     }
 

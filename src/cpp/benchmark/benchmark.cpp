@@ -12,14 +12,13 @@ static void BM_1000Orders(benchmark::State& state) {
     auto gateway = std::make_unique<OrderGateway>(engine);
     auto generator = OrderGenerator{2};
 
-
     std::array<OrderGateway::OrderRequest, 1000> orders;
     for (size_t i = 0; i < orders.size(); i++) {
         orders[i] = generator.generate_order();
     }
 
     for (auto _ : state) {
-        engine->reset(); 
+        // engine->reset(); 
 
         for (const auto& request : orders) {
             try {

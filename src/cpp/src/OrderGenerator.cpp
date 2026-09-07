@@ -1,8 +1,8 @@
 #include "../include/lob/OrderGenerator.h"
 
 OrderGenerator::OrderGenerator(int seed): gen(seed), 
-                                    price_dist(10000, price_sd), 
-                                    volume_dist(10000, volume_sd),
+                                    price_dist(1000, price_sd), 
+                                    volume_dist(1000, volume_sd),
                                     side_dist(0, 1),
                                     mpid_dist(size_t(0), (MP_IDENTIFIERS_NUM) - 1)
 {
@@ -29,7 +29,7 @@ price_t OrderGenerator::generate_price() {
 }
 
 volume_t OrderGenerator::generate_volume() {
-    last_volume = std::lround(volume_dist(gen));
+    last_volume = std::round(volume_dist(gen));
     volume_dist = std::normal_distribution<float>(last_volume, volume_sd);
     return last_volume;
 }
