@@ -5,9 +5,11 @@ MatchingEngine::MatchingEngine(): order_book{}, snapshot_buffer{std::make_shared
 MatchResult MatchingEngine::handle_order(std::shared_ptr<Order> order) {
     auto result = (order->side == OrderSide::BUY) ? handle_buy(std::move(order)) : handle_sell(std::move(order));
     auto now = std::chrono::steady_clock::now();
-    if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) > CONFIG::SNAPSHOT_PERIOD) {
-        push_snapshot(std::move(order_book.get_snapshot()));
-        last_snapshot_time = now;
+    if (CONFIG::CAPTURE_SNAPSHOTS) {
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) > CONFIG::SNAPSHOT_PERIOD) {
+            push_snapshot(std::move(order_book.get_snapshot()));
+            last_snapshot_time = now;
+        }
     }
     return result;
 }

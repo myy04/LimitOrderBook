@@ -11,7 +11,6 @@ int main() {
     auto gateway = std::make_unique<OrderGateway>(engine);
     auto generator = OrderGenerator{2};
 
-
     std::array<OrderGateway::OrderRequest, 1000> orders;
     for (size_t i = 0; i < orders.size(); i++) {
         orders[i] = generator.generate_order();
@@ -27,7 +26,6 @@ int main() {
             std::cout << "INVALID " << e.what() << '\n';
         }
     }
-
 
     return 0;
 }

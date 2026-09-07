@@ -29,6 +29,7 @@ bool OrderGateway::is_order_valid(OrderRequest req) {
     try {
         convert_price(req.price);
         if (req.volume < CONFIG::MIN_VOLUME || req.volume > CONFIG::MAX_VOLUME) return false;
+        return true;
     } catch (const GatewayException&) {
         return false;
     }
