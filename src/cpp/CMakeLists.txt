@@ -1,25 +1,27 @@
 cmake_minimum_required(VERSION 3.15)
-project("LimitOrderBook_cpp")
-set(PYBIND11_FINDPYTHON ON)
-find_package(pybind11 REQUIRED)
+project(LimitOrderBook)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "../src/LimitOrderBook")
-set(CMAKE_CXX_STANDARD_REQUIRED 20)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-pybind11_add_module(LimitOrderBook_cpp 
-    bindings.cpp
-    ./src/OrderBook.cpp
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+
+add_library(lob_core STATIC
     ./src/MatchingEngine.cpp
+    ./src/OrderBook.cpp
+    ./src/OrderGenerator.cpp
     ./src/SnapshotBuffer.cpp
+    ./src/OrderGateway.cpp
 )
 
-option(LOB_BUILD_TESTS "Build the C++ unit tests (requires GoogleTest)" ON)
-if(LOB_BUILD_TESTS)
-    find_package(GTest QUIET)
-    if(GTest_FOUND)
-        enable_testing()
-        add_subdirectory(tests)
-    else()
-        message(STATUS "GoogleTest not found; skipping LimitOrderBook_cpp tests")
-    endif()
-endif()
+target_include_directories(lob_core PUBLIC ./include)
+
+add_subdirectory(./benchmark)
+add_subdirectory(./cli)

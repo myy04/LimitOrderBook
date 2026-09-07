@@ -10,21 +10,48 @@
 #include <memory>
 #include <chrono>
 #include <ctime>
+#include <vector>
+
+class Pool {
+public:
+    Pool(): pool{}, pos{} {
+        pool.reserve(1e6);
+    }
+
+    void insert(const Order& order) {   
+        pool.push_back(order);
+        auto index = pool.size() - 1;
+        pos[order.order_id] = index; 
+    }  
+
+    Order& get(Order::order_id_t order_id) {
+        auto index = pos.at(order_id);
+        return pool[index];
+    }
+
+private:    
+    std::vector<Order> pool;
+    std::unordered_map<Order::order_id_t, size_t> pos;
+};
 
 class OrderBook {
 public:
     explicit OrderBook();    
 
-    void insert_order(std::shared_ptr<Order>) noexcept;
-    void remove_order(std::shared_ptr<Order>) noexcept;
-    std::shared_ptr<Order> peek_best_bid();
-    std::shared_ptr<Order> peek_best_ask();
+    void insert_order(const Order& order);
+    void remove_order(const Order& order);
+    Order& peek_best_bid();
+    Order& peek_best_ask();
     BookSnapshot get_snapshot();
 
+    void print_orderbook();
+
 private:
-    std::map<int, std::list<std::shared_ptr<Order>>> bids;
-    std::map<int, std::list<std::shared_ptr<Order>>> asks;
-    std::unordered_map<int, std::list<std::shared_ptr<Order>>::iterator> nodes; 
+    std::map<int, std::list<size_t>> bid_tree; // price -> list of orders_id
+    std::map<int, std::list<size_t>> ask_tree; // price -> list of orders_id
+    std::unordered_map<int, std::list<size_t>::iterator> order_to_node; // order_id -> list iterator
+    
+    Pool pool;
 };
 
 

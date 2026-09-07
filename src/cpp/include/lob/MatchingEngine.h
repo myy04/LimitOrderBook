@@ -12,18 +12,19 @@ class MatchingEngine {
 public: 
     explicit MatchingEngine(); 
 
-    MatchResult handle_order(std::shared_ptr<Order> order); 
-    std::vector<MatchResult> handle_orders(std::vector<std::shared_ptr<Order>> orders);
-
+    MatchResult handle_order(Order&& order); 
+    
+    void reset();
+    
     BookSnapshot pull_snapshot();
-
+    
 private:
-    MatchResult handle_buy(std::shared_ptr<Order> order);
-    MatchResult handle_sell(std::shared_ptr<Order> order);
-    SelfTradeCancellation handle_self_trade(std::shared_ptr<Order> aggressor_order, std::shared_ptr<Order> resting_order);
-
+    MatchResult handle_buy(Order& order);
+    MatchResult handle_sell(Order& order);
+    SelfTradeCancellation handle_self_trade(Order& aggressor_order, Order& resting_order);
+    
     void push_snapshot(BookSnapshot);
-
+    
     OrderBook order_book;
     std::shared_ptr<SnapshotBuffer> snapshot_buffer; 
     decltype(std::chrono::steady_clock::now()) last_snapshot_time;
