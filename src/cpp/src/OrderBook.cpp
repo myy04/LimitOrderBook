@@ -87,3 +87,11 @@ void OrderBook::print_orderbook() {
         }
     }
 }
+
+bool OrderBook::is_ask_tree_empty() {
+    return ask_tree.empty();
+}
+
+bool OrderBook::is_bid_tree_empty() {
+    return bid_tree.empty();
+}

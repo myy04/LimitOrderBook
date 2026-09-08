@@ -15,7 +15,7 @@
 class Pool {
 public:
     Pool(): pool{}, pos{} {
-        pool.reserve(1e6);
+        pool.reserve(2e6);
     }
 
     void insert(const Order& order) {   
@@ -43,6 +43,9 @@ public:
     Order& peek_best_bid();
     Order& peek_best_ask();
     BookSnapshot get_snapshot();
+
+    bool is_ask_tree_empty();
+    bool is_bid_tree_empty();
 
     void print_orderbook();
 

@@ -10,7 +10,6 @@ class SnapshotBuffer {
 public:
     explicit SnapshotBuffer();
     void push(const BookSnapshot& snapshot);
-
     BookSnapshot pull();
 private:    
     BookSnapshot last_snapshot;

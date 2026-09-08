@@ -26,7 +26,7 @@ private:
     void push_snapshot(BookSnapshot);
     
     OrderBook order_book;
-    std::shared_ptr<SnapshotBuffer> snapshot_buffer; 
+    SnapshotBuffer snapshot_buffer; 
     decltype(std::chrono::steady_clock::now()) last_snapshot_time;
 };  
 
