@@ -65,14 +65,14 @@ inline std::ostream& operator<<(std::ostream& os, const Order& ord) {
 struct Trade {
     Order::order_id_t aggressor_order_id;
     Order::order_id_t resting_order_id;
-    int price;
+    float price;
     int volume;
 };
 
 struct SelfTradeCancellation {
     Order::order_id_t aggressor_order_id;
     Order::order_id_t resting_order_id;
-    int price;
+    float price;
     int volume;
 };
 

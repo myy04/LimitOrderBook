@@ -31,7 +31,7 @@ MatchResult MatchingEngine::handle_buy(Order& order) {
 
     while (order.volume > 0) {
         if (order_book.is_ask_tree_empty()) break;
-        auto best_ask = order_book.peek_best_ask();
+        auto& best_ask = order_book.peek_best_ask();
         if (best_ask.price > order.price) break;
         
         if (best_ask.trader_id == order.trader_id) {
@@ -41,7 +41,7 @@ MatchResult MatchingEngine::handle_buy(Order& order) {
 
         Trade trade{};
         trade.volume = std::min(order.volume, best_ask.volume);
-        trade.price = best_ask.price;
+        trade.price = best_ask.price * CONFIG::PRICE_TICK_SIZE;
         trade.aggressor_order_id = order.order_id;
         trade.resting_order_id = best_ask.order_id;
 
@@ -62,7 +62,7 @@ MatchResult MatchingEngine::handle_sell(Order& order) {
 
     while (order.volume > 0) {
         if (order_book.is_bid_tree_empty()) break;
-        auto best_bid = order_book.peek_best_bid();
+        auto& best_bid = order_book.peek_best_bid();
         if (best_bid.price < order.price) break;
         
         if (best_bid.trader_id == order.trader_id) {
@@ -72,7 +72,7 @@ MatchResult MatchingEngine::handle_sell(Order& order) {
 
         Trade trade{};
         trade.volume = std::min(order.volume, best_bid.volume);
-        trade.price = best_bid.price;
+        trade.price = best_bid.price * CONFIG::PRICE_TICK_SIZE;
         trade.aggressor_order_id = order.order_id;
         trade.resting_order_id = best_bid.order_id;
 
@@ -91,7 +91,7 @@ MatchResult MatchingEngine::handle_sell(Order& order) {
 SelfTradeCancellation MatchingEngine::handle_self_trade(Order& aggressor_order, Order& resting_order) {
     SelfTradeCancellation cancel{};
     cancel.volume = std::min(aggressor_order.volume, resting_order.volume);
-    cancel.price = resting_order.price;
+    cancel.price = resting_order.price * CONFIG::PRICE_TICK_SIZE;
     cancel.resting_order_id = resting_order.order_id;
     cancel.aggressor_order_id = aggressor_order.order_id;
     resting_order.volume -= cancel.volume;
@@ -110,5 +110,9 @@ BookSnapshot MatchingEngine::pull_snapshot() {
 }
 
 void MatchingEngine::reset() {
-    order_book = OrderBook();
+    order_book.reset();
+}
+
+const Order& MatchingEngine::get_order(Order::order_id_t order_id) {
+    return order_book.get_order(order_id);
 }

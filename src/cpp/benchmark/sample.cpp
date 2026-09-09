@@ -4,11 +4,9 @@
 
 #include "../include/lob/OrderGenerator.h"
 #include "../include/lob/OrderGateway.h"
-#include "../include/lob/MatchingEngine.h"
 
 int main() {
-    auto engine = std::make_shared<MatchingEngine>();
-    auto gateway = std::make_unique<OrderGateway>(engine);
+    auto gateway = std::make_unique<OrderGateway>();
     auto generator = OrderGenerator{2};
 
     std::array<OrderGateway::OrderRequest, 20> orders;

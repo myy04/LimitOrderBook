@@ -25,3 +25,14 @@ target_include_directories(lob_core PUBLIC ./include)
 
 add_subdirectory(./benchmark)
 add_subdirectory(./cli)
+
+option(LOB_BUILD_TESTS "Build the GTest unit tests" ON)
+if (LOB_BUILD_TESTS)
+    add_subdirectory(./tests)
+endif()
+
+option(LOB_BUILD_BINDINGS "Build the pybind11 Python bindings" ON)
+if (LOB_BUILD_BINDINGS)
+    add_subdirectory(bindings)
+endif()
+

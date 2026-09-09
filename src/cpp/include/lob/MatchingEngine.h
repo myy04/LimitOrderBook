@@ -18,6 +18,8 @@ public:
     
     BookSnapshot pull_snapshot();
     
+    const Order& get_order(Order::order_id_t order_id);
+
 private:
     MatchResult handle_buy(Order& order);
     MatchResult handle_sell(Order& order);

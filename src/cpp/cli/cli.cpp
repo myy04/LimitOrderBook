@@ -3,7 +3,6 @@
 #include <atomic>
 
 #include "../include/lob/OrderGenerator.h"
-#include "../include/lob/MatchingEngine.h"
 #include "../include/lob/OrderGateway.h"
 
 std::atomic<bool> running{true};
@@ -29,13 +28,12 @@ void output_snapshot(const BookSnapshot& snap) {
 int main() {
     signal(SIGINT, [](int sig){running.store(false);});
 
-    auto engine = std::make_shared<MatchingEngine>();
-    auto gateway = OrderGateway(engine);
+    auto gateway = OrderGateway();
     auto generator = OrderGenerator{2};
 
     std::thread([&]() {
         while (running.load()) {
-            output_snapshot(engine->pull_snapshot());
+            output_snapshot(gateway.pull_snapshot());
         }
     }
     ).detach();

@@ -1,10 +1,11 @@
-import decimal
-PRICE_TICK_SIZE = decimal.Decimal("0.01")
-SNAPSHOT_PERIOD = 1
-SNAPSHOT_DEPTH = 10
+from LimitOrderBook.LimitOrderBook_cpp import *
 
-from LimitOrderBook.DataTypes import *
-from LimitOrderBook.MatchingEngine import *
-from LimitOrderBook.OrderGateway import * 
-
-from . import LimitOrderBook_cpp as cpp
+__all__ = [
+    "OrderSide",
+    "Mpid",
+    "Order",
+    "Trade",
+    "SelfTradeCancellation",
+    "MatchResult",
+    "BookSnapshot"   
+]

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <memory>
 #include <string>
 
 #include "lob/OrderBook.h"
@@ -8,10 +7,16 @@
 
 namespace {
 
-std::shared_ptr<Order> make_order(OrderSide side, int price, int volume, int order_id,
-                                   const std::string &trader_id = "trader",
-                                   float timestamp = 0.0f) {
-    return std::make_shared<Order>(Order{side, price, volume, order_id, timestamp, trader_id});
+Order make_order(OrderSide side, uint64_t price, uint64_t volume, uint64_t order_id,
+                 const char* trader_id = "TEST", uint64_t timestamp = 0) {
+    Order order{};
+    order.side = side;
+    order.price = price;
+    order.volume = volume;
+    order.order_id = order_id;
+    order.trader_id = Mpid{trader_id};
+    order.timestamp = timestamp;
+    return order;
 }
 
 class OrderBookTest : public ::testing::Test {
@@ -24,22 +29,16 @@ protected:
 // ---------------------------------------------------------------------------
 
 TEST_F(OrderBookTest, PeekBestBidThrowsWhenBookIsEmpty) {
-    // Act & Assert
-    EXPECT_EQ(book.peek_best_bid(), nullptr);
+    EXPECT_THROW(book.peek_best_bid(), const char*);
 }
 
 TEST_F(OrderBookTest, PeekBestAskThrowsWhenBookIsEmpty) {
-    // Act & Assert
-    EXPECT_EQ(book.peek_best_ask(), nullptr);
+    EXPECT_THROW(book.peek_best_ask(), const char*);
 }
 
-TEST_F(OrderBookTest, RemovingFromEmptyBookIsNoOp) {
-    // Arrange
-    auto order = make_order(OrderSide::BUY, 100, 10, 1);
-
-    // Act & Assert (no exception expected)
-    EXPECT_NO_THROW(book.remove_order(order));
-    EXPECT_EQ(book.peek_best_bid(), nullptr);
+TEST_F(OrderBookTest, IsEmptyChecksAreTrueOnEmptyBook) {
+    EXPECT_TRUE(book.is_bid_tree_empty());
+    EXPECT_TRUE(book.is_ask_tree_empty());
 }
 
 // ---------------------------------------------------------------------------
@@ -47,46 +46,31 @@ TEST_F(OrderBookTest, RemovingFromEmptyBookIsNoOp) {
 // ---------------------------------------------------------------------------
 
 TEST_F(OrderBookTest, InsertedBuyOrderBecomesBestBid) {
-    // Arrange
-    auto order = make_order(OrderSide::BUY, 100, 10, 1);
+    book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
 
-    // Act
-    book.insert_order(order);
-
-    // Assert
-    auto best_bid = book.peek_best_bid();
-    EXPECT_EQ(best_bid->order_id, 1);
-    EXPECT_EQ(best_bid->price, 100);
-    EXPECT_EQ(best_bid->volume, 10);
-    EXPECT_EQ(book.peek_best_ask(), nullptr);
+    auto& best_bid = book.peek_best_bid();
+    EXPECT_EQ(best_bid.order_id, 1u);
+    EXPECT_EQ(best_bid.price, 100u);
+    EXPECT_EQ(best_bid.volume, 10u);
+    EXPECT_TRUE(book.is_ask_tree_empty());
 }
 
 TEST_F(OrderBookTest, InsertedSellOrderBecomesBestAsk) {
-    // Arrange
-    auto order = make_order(OrderSide::SELL, 105, 5, 1);
+    book.insert_order(make_order(OrderSide::SELL, 105, 5, 1));
 
-    // Act
-    book.insert_order(order);
-
-    // Assert
-    auto best_ask = book.peek_best_ask();
-    EXPECT_EQ(best_ask->order_id, 1);
-    EXPECT_EQ(best_ask->price, 105);
-    EXPECT_EQ(book.peek_best_bid(), nullptr);
+    auto& best_ask = book.peek_best_ask();
+    EXPECT_EQ(best_ask.order_id, 1u);
+    EXPECT_EQ(best_ask.price, 105u);
+    EXPECT_EQ(best_ask.volume, 5u);
+    EXPECT_TRUE(book.is_bid_tree_empty());
 }
 
 TEST_F(OrderBookTest, BidsAndAsksAreTrackedIndependently) {
-    // Arrange
-    auto bid = make_order(OrderSide::BUY, 100, 10, 1);
-    auto ask = make_order(OrderSide::SELL, 100, 5, 2);
+    book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
+    book.insert_order(make_order(OrderSide::SELL, 110, 5, 2));
 
-    // Act
-    book.insert_order(bid);
-    book.insert_order(ask);
-
-    // Assert
-    EXPECT_EQ(book.peek_best_bid()->order_id, 1);
-    EXPECT_EQ(book.peek_best_ask()->order_id, 2);
+    EXPECT_EQ(book.peek_best_bid().order_id, 1u);
+    EXPECT_EQ(book.peek_best_ask().order_id, 2u);
 }
 
 // ---------------------------------------------------------------------------
@@ -94,31 +78,23 @@ TEST_F(OrderBookTest, BidsAndAsksAreTrackedIndependently) {
 // ---------------------------------------------------------------------------
 
 TEST_F(OrderBookTest, BestBidIsHighestPricedBuyOrder) {
-    // Arrange
     book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
     book.insert_order(make_order(OrderSide::BUY, 105, 10, 2));
     book.insert_order(make_order(OrderSide::BUY, 95, 10, 3));
 
-    // Act
-    auto best_bid = book.peek_best_bid();
-
-    // Assert
-    EXPECT_EQ(best_bid->order_id, 2);
-    EXPECT_EQ(best_bid->price, 105);
+    auto& best_bid = book.peek_best_bid();
+    EXPECT_EQ(best_bid.order_id, 2u);
+    EXPECT_EQ(best_bid.price, 105u);
 }
 
 TEST_F(OrderBookTest, BestAskIsLowestPricedSellOrder) {
-    // Arrange
     book.insert_order(make_order(OrderSide::SELL, 105, 10, 1));
     book.insert_order(make_order(OrderSide::SELL, 100, 10, 2));
     book.insert_order(make_order(OrderSide::SELL, 110, 10, 3));
 
-    // Act
-    auto best_ask = book.peek_best_ask();
-
-    // Assert
-    EXPECT_EQ(best_ask->order_id, 2);
-    EXPECT_EQ(best_ask->price, 100);
+    auto& best_ask = book.peek_best_ask();
+    EXPECT_EQ(best_ask.order_id, 2u);
+    EXPECT_EQ(best_ask.price, 100u);
 }
 
 // ---------------------------------------------------------------------------
@@ -126,33 +102,24 @@ TEST_F(OrderBookTest, BestAskIsLowestPricedSellOrder) {
 // ---------------------------------------------------------------------------
 
 TEST_F(OrderBookTest, OrdersAtSamePriceMaintainFifoOrder) {
-    // Arrange
     book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
     book.insert_order(make_order(OrderSide::BUY, 100, 5, 2));
     book.insert_order(make_order(OrderSide::BUY, 100, 3, 3));
 
-    // Act
-    auto best_bid = book.peek_best_bid();
-
-    // Assert: the first order inserted at the price level should be at the front
-    EXPECT_EQ(best_bid->order_id, 1);
+    EXPECT_EQ(book.peek_best_bid().order_id, 1u);
 }
 
 TEST_F(OrderBookTest, RemovingFrontOrderExposesNextOrderInFifoQueue) {
-    // Arrange
     auto first = make_order(OrderSide::BUY, 100, 10, 1);
     book.insert_order(first);
     book.insert_order(make_order(OrderSide::BUY, 100, 5, 2));
 
-    // Act
     book.remove_order(first);
 
-    // Assert
-    EXPECT_EQ(book.peek_best_bid()->order_id, 2);
+    EXPECT_EQ(book.peek_best_bid().order_id, 2u);
 }
 
 TEST_F(OrderBookTest, RemovingMiddleOrderPreservesRelativeFifoOrderOfSurvivors) {
-    // Arrange
     auto first = make_order(OrderSide::BUY, 100, 10, 1);
     auto second = make_order(OrderSide::BUY, 100, 5, 2);
     auto third = make_order(OrderSide::BUY, 100, 3, 3);
@@ -160,13 +127,11 @@ TEST_F(OrderBookTest, RemovingMiddleOrderPreservesRelativeFifoOrderOfSurvivors) 
     book.insert_order(second);
     book.insert_order(third);
 
-    // Act
     book.remove_order(second);
 
-    // Assert: front is still the first order, and the second order is fully gone
-    EXPECT_EQ(book.peek_best_bid()->order_id, 1);
+    EXPECT_EQ(book.peek_best_bid().order_id, 1u);
     book.remove_order(first);
-    EXPECT_EQ(book.peek_best_bid()->order_id, 3);
+    EXPECT_EQ(book.peek_best_bid().order_id, 3u);
 }
 
 // ---------------------------------------------------------------------------
@@ -174,127 +139,93 @@ TEST_F(OrderBookTest, RemovingMiddleOrderPreservesRelativeFifoOrderOfSurvivors) 
 // ---------------------------------------------------------------------------
 
 TEST_F(OrderBookTest, RemovingOnlyBidAtPriceLevelClearsTheBook) {
-    // Arrange
     auto order = make_order(OrderSide::BUY, 100, 10, 1);
     book.insert_order(order);
 
-    // Act
     book.remove_order(order);
 
-    // Assert
-    EXPECT_EQ(book.peek_best_bid(), nullptr);
+    EXPECT_TRUE(book.is_bid_tree_empty());
 }
 
 TEST_F(OrderBookTest, RemovingOnlyAskAtPriceLevelClearsTheBook) {
-    // Arrange
     auto order = make_order(OrderSide::SELL, 100, 10, 1);
     book.insert_order(order);
 
-    // Act
     book.remove_order(order);
 
-    // Assert
-    EXPECT_EQ(book.peek_best_ask(), nullptr);
+    EXPECT_TRUE(book.is_ask_tree_empty());
 }
 
 TEST_F(OrderBookTest, RemovingBestBidExposesNextBestPriceLevel) {
-    // Arrange
     book.insert_order(make_order(OrderSide::BUY, 95, 10, 1));
     auto best = make_order(OrderSide::BUY, 105, 10, 2);
     book.insert_order(best);
 
-    // Act
     book.remove_order(best);
 
-    // Assert
-    auto new_best_bid = book.peek_best_bid();
-    EXPECT_EQ(new_best_bid->order_id, 1);
-    EXPECT_EQ(new_best_bid->price, 95);
+    auto& new_best_bid = book.peek_best_bid();
+    EXPECT_EQ(new_best_bid.order_id, 1u);
+    EXPECT_EQ(new_best_bid.price, 95u);
 }
 
 TEST_F(OrderBookTest, RemovingBestAskExposesNextBestPriceLevel) {
-    // Arrange
     book.insert_order(make_order(OrderSide::SELL, 110, 10, 1));
     auto best = make_order(OrderSide::SELL, 100, 10, 2);
     book.insert_order(best);
 
-    // Act
     book.remove_order(best);
 
-    // Assert
-    auto new_best_ask = book.peek_best_ask();
-    EXPECT_EQ(new_best_ask->order_id, 1);
-    EXPECT_EQ(new_best_ask->price, 110);
+    auto& new_best_ask = book.peek_best_ask();
+    EXPECT_EQ(new_best_ask.order_id, 1u);
+    EXPECT_EQ(new_best_ask.price, 110u);
 }
 
 TEST_F(OrderBookTest, RemovingOneOrderDoesNotAffectOtherPriceLevels) {
-    // Arrange
     auto low = make_order(OrderSide::BUY, 95, 10, 1);
     auto high = make_order(OrderSide::BUY, 105, 10, 2);
     book.insert_order(low);
     book.insert_order(high);
 
-    // Act
     book.remove_order(low);
 
-    // Assert: best bid is untouched, and the removed level is gone
-    EXPECT_EQ(book.peek_best_bid()->order_id, 2);
+    EXPECT_EQ(book.peek_best_bid().order_id, 2u);
 }
 
 // ---------------------------------------------------------------------------
-// Idempotency / unknown order handling
+// Volume mutation is reflected through the pool
 // ---------------------------------------------------------------------------
 
-TEST_F(OrderBookTest, RemovingUnknownOrderIdIsNoOp) {
-    // Arrange
-    auto resting = make_order(OrderSide::BUY, 100, 10, 1);
-    book.insert_order(resting);
-    auto unknown = make_order(OrderSide::BUY, 100, 10, 999);
+TEST_F(OrderBookTest, MutatingReturnedOrderRefUpdatesPooledOrder) {
+    book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
 
-    // Act & Assert (no exception, resting order remains)
-    EXPECT_NO_THROW(book.remove_order(unknown));
-    EXPECT_EQ(book.peek_best_bid()->order_id, 1);
-}
+    auto& best_bid = book.peek_best_bid();
+    best_bid.volume = 4;
 
-TEST_F(OrderBookTest, RemovingSameOrderTwiceIsSafe) {
-    // Arrange
-    auto order = make_order(OrderSide::BUY, 100, 10, 1);
-    book.insert_order(order);
-    book.remove_order(order);
-
-    // Act & Assert (second removal should be a silent no-op)
-    EXPECT_NO_THROW(book.remove_order(order));
-    EXPECT_EQ(book.peek_best_bid(), nullptr);
+    EXPECT_EQ(book.peek_best_bid().volume, 4u);
 }
 
 // ---------------------------------------------------------------------------
-// Larger, mixed scenarios
+// Reset
 // ---------------------------------------------------------------------------
 
-TEST_F(OrderBookTest, MultipleInsertsAndRemovalsAcrossBothSidesTrackIndependently) {
-    // Arrange
-    auto bid1 = make_order(OrderSide::BUY, 100, 10, 1);
-    auto bid2 = make_order(OrderSide::BUY, 102, 5, 2);
-    auto ask1 = make_order(OrderSide::SELL, 110, 7, 3);
-    auto ask2 = make_order(OrderSide::SELL, 108, 3, 4);
+TEST_F(OrderBookTest, ResetClearsBookContents) {
+    book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
+    book.insert_order(make_order(OrderSide::SELL, 105, 5, 2));
 
-    // Act
-    book.insert_order(bid1);
-    book.insert_order(bid2);
-    book.insert_order(ask1);
-    book.insert_order(ask2);
+    book.reset();
 
-    // Assert: highest bid, lowest ask
-    EXPECT_EQ(book.peek_best_bid()->order_id, 2);
-    EXPECT_EQ(book.peek_best_ask()->order_id, 4);
+    EXPECT_TRUE(book.is_bid_tree_empty());
+    EXPECT_TRUE(book.is_ask_tree_empty());
+}
 
-    // Act: remove the best bid and best ask
-    book.remove_order(bid2);
-    book.remove_order(ask2);
+TEST_F(OrderBookTest, BookIsUsableAfterReset) {
+    book.insert_order(make_order(OrderSide::BUY, 100, 10, 1));
+    book.reset();
 
-    // Assert: next best levels surface on both sides
-    EXPECT_EQ(book.peek_best_bid()->order_id, 1);
-    EXPECT_EQ(book.peek_best_ask()->order_id, 3);
+    book.insert_order(make_order(OrderSide::BUY, 105, 3, 2));
+    auto& best_bid = book.peek_best_bid();
+    EXPECT_EQ(best_bid.order_id, 2u);
+    EXPECT_EQ(best_bid.price, 105u);
 }
 
 }  // namespace

@@ -1,13 +1,11 @@
-add_executable(lob_tests EXCLUDE_FROM_ALL
+find_package(GTest CONFIG REQUIRED)
+
+add_executable(lob_tests
     OrderBook_test.cpp
-    MatchingEngine_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/OrderBook.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/MatchingEngine.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/SnapshotBuffer.cpp
+    OrderGateway_test.cpp
 )
 
-target_include_directories(lob_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-target_link_libraries(lob_tests PRIVATE GTest::gtest GTest::gtest_main)
+target_link_libraries(lob_tests PRIVATE lob_core GTest::gtest GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(lob_tests)

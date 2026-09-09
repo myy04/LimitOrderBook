@@ -24,13 +24,13 @@ void OrderBook::remove_order(const Order& order) {
 
 Order& OrderBook::peek_best_bid() {         
     if (bid_tree.empty()) throw "no bids";
-    auto list = bid_tree.rbegin()->second; 
+    auto& list = bid_tree.rbegin()->second; 
     return pool.get(*list.begin());
 }
 
 Order& OrderBook::peek_best_ask() { 
     if (ask_tree.empty()) throw "no asks";
-    auto list = ask_tree.begin()->second;
+    auto& list = ask_tree.begin()->second;
     return pool.get(*list.begin());
 }
 
@@ -94,4 +94,17 @@ bool OrderBook::is_ask_tree_empty() {
 
 bool OrderBook::is_bid_tree_empty() {
     return bid_tree.empty();
+}
+
+// Clear book contents in place while preserving the pool's capacity,
+// avoiding a large free/re-allocate cycle between benchmark iterations.
+void OrderBook::reset() {
+    bid_tree.clear();
+    ask_tree.clear();
+    order_to_node.clear();
+    pool.clear();
+}
+
+const Order& OrderBook::get_order(Order::order_id_t order_id) {
+    return pool.get(order_id);
 }

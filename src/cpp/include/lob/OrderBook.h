@@ -29,6 +29,11 @@ public:
         return pool[index];
     }
 
+    void clear() {
+        pool.clear();
+        pos.clear();
+    }
+
 private:    
     std::vector<Order> pool;
     std::unordered_map<Order::order_id_t, size_t> pos;
@@ -48,6 +53,10 @@ public:
     bool is_bid_tree_empty();
 
     void print_orderbook();
+
+    void reset();
+
+    const Order& get_order(Order::order_id_t);
 
 private:
     std::map<int, std::list<size_t>> bid_tree; // price -> list of orders_id

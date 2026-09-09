@@ -7,7 +7,6 @@
 
 #include <exception>
 #include <cmath>
-#include <memory>
 #include <chrono>
 
 class OrderGateway {
@@ -19,17 +18,24 @@ public:
         Mpid trader_id;
     };
 
-    explicit OrderGateway(std::shared_ptr<MatchingEngine> engine): engine{engine} {}
+    explicit OrderGateway(): engine{} {}
 
     MatchResult submit_order(OrderRequest order);
     static bool is_order_valid(OrderRequest req);
+
+    const Order& get_order(Order::order_id_t);
+
+    void reset();
+
+    BookSnapshot pull_snapshot();
+
 private:    
     Order create_order(const OrderRequest& order_request);
-    std::shared_ptr<MatchingEngine> engine;
+    MatchingEngine engine;
 
     static Order::price_t convert_price(decltype(OrderGateway::OrderRequest::price));
 
-    static inline size_t order_counter = 0; 
+    size_t order_counter = 0; 
 };
 
 class GatewayException : public std::runtime_error {
