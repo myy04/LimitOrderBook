@@ -9,7 +9,7 @@ int main() {
     auto gateway = std::make_unique<OrderGateway>();
     auto generator = OrderGenerator{2};
 
-    std::array<OrderGateway::OrderRequest, 20> orders;
+    std::array<OrderRequest, 20> orders;
     for (size_t i = 0; i < orders.size(); i++) {
         orders[i] = generator.generate_order();
     }

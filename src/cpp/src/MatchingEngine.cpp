@@ -5,15 +5,15 @@ MatchingEngine::MatchingEngine(): order_book{}, last_snapshot_time{}, snapshot_b
 MatchResult MatchingEngine::handle_order(Order&& order) {
     auto result = (order.side == OrderSide::BUY) ? handle_buy(order) : handle_sell(order);
 
-    if constexpr (CONFIG::CAPTURE_SNAPSHOTS) {
+    #ifdef CAPTURE_SNAPSHOTS
         auto now = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::seconds>(now - last_snapshot_time) > CONFIG::SNAPSHOT_PERIOD) {
+        if (now - last_snapshot_time >= CONFIG::SNAPSHOT_PERIOD) {
             push_snapshot(std::move(order_book.get_snapshot()));
             last_snapshot_time = now;
         }
-    }
+    #endif
     
-    if constexpr (CONFIG::DEBUG_OUTPUT) {
+    #ifdef DEBUG_OUTPUT
         std::cout << '\n';
         for (int i = 1; i <= 100; i++) std::cout << '-';
         std::cout << '\n';
@@ -21,7 +21,7 @@ MatchResult MatchingEngine::handle_order(Order&& order) {
         std::cout << '\n';
         for (int i = 1; i <= 100; i++) std::cout << '-';
         std::cout << '\n';
-    }
+    #endif
 
     return result;
 }

@@ -7,11 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
 
 add_library(lob_core STATIC
     ./src/MatchingEngine.cpp
@@ -21,18 +19,26 @@ add_library(lob_core STATIC
     ./src/OrderGateway.cpp
 )
 
+add_library(lob_core_pure STATIC
+    ./src/MatchingEngine.cpp
+    ./src/OrderBook.cpp
+    ./src/OrderGenerator.cpp
+    ./src/SnapshotBuffer.cpp
+    ./src/OrderGateway.cpp
+)
+
 target_include_directories(lob_core PUBLIC ./include)
+target_include_directories(lob_core_pure PUBLIC ./include)
 
-add_subdirectory(./benchmark)
-add_subdirectory(./cli)
+# lob_core is going to output debugs and capture snapshots (lob_core_pure is intended for maximum performance)
+target_compile_definitions(lob_core PRIVATE CAPTURE_SNAPSHOTS)
+target_compile_definitions(lob_core PRIVATE OUTPUT_DEBUG)
 
-option(LOB_BUILD_TESTS "Build the GTest unit tests" ON)
-if (LOB_BUILD_TESTS)
+
+# Dev-only targets (external deps: google benchmark, GTest) are skipped when
+# scikit-build-core drives the build (pip); SKBUILD is only defined then.
+if(NOT SKBUILD)
+    add_subdirectory(./benchmark)
     add_subdirectory(./tests)
 endif()
-
-option(LOB_BUILD_BINDINGS "Build the pybind11 Python bindings" ON)
-if (LOB_BUILD_BINDINGS)
-    add_subdirectory(bindings)
-endif()
-
+add_subdirectory(./bindings)

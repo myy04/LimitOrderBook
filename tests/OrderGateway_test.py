@@ -102,13 +102,14 @@ class TestOrderGatewayHappyPath:
         assert isinstance(result, MatchResult)
         assert result.trades == []
 
-    def test_resting_order_price_is_stored_in_ticks(self, gateway):
+    def test_resting_order_price_is_returned_as_real_price(self, gateway):
         # Arrange & Act
         gateway.submit_order(make_request(price=100.0))
 
-        # Assert: 100.0 / 0.1 tick size == 1000 ticks
+        # Assert: internal ticks (100.0 / 0.1 == 1000) are converted back
+        # to a real price in the OrderRequest returned to the client
         resting = gateway.get_order(1)
-        assert resting.price == 1000
+        assert resting.price == pytest.approx(100.0, abs=1e-4)
         assert resting.side == OrderSide.BUY
         assert resting.volume == 10
 

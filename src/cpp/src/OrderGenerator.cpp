@@ -10,8 +10,8 @@ OrderGenerator::OrderGenerator(int seed): gen(seed),
     last_volume = generate_volume();
 }
 
-OrderGateway::OrderRequest OrderGenerator::generate_order() {
-    OrderGateway::OrderRequest ord;
+OrderRequest OrderGenerator::generate_order() {
+    OrderRequest ord;
     while (true) {
         ord.price = generate_price();
         ord.volume = generate_volume();

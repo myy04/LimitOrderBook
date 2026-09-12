@@ -19,9 +19,9 @@ Order OrderGateway::create_order(const OrderRequest& order_request) {
     return order; 
 }
 
-Order::price_t OrderGateway::convert_price(decltype(OrderGateway::OrderRequest::price) orig_price) {
+Order::price_t OrderGateway::convert_price(decltype(OrderRequest::price) orig_price) {
     if (orig_price < CONFIG::MIN_PRICE || orig_price > CONFIG::MAX_PRICE) throw GatewayException("Price is out of range");  
-    decltype(OrderGateway::OrderRequest::price) nearest_tick = std::round(orig_price / CONFIG::PRICE_TICK_SIZE) * CONFIG::PRICE_TICK_SIZE;
+    decltype(OrderRequest::price) nearest_tick = std::round(orig_price / CONFIG::PRICE_TICK_SIZE) * CONFIG::PRICE_TICK_SIZE;
     if (std::abs(orig_price - nearest_tick) > CONFIG::EPS) throw GatewayException("Price is not divisible by tick size");
     return std::round(orig_price / CONFIG::PRICE_TICK_SIZE);
 }
@@ -35,7 +35,7 @@ bool OrderGateway::is_order_valid(OrderRequest req) {
     return req.volume >= CONFIG::MIN_VOLUME && req.volume <= CONFIG::MAX_VOLUME;
 }
 
-const Order& OrderGateway::get_order(Order::order_id_t order_id) {
+const OrderRequest OrderGateway::get_order(Order::order_id_t order_id) {
     return engine.get_order(order_id);
 }
 

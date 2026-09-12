@@ -58,6 +58,18 @@ struct Order {
     using timestamp_t = decltype(timestamp);
 };
 
+struct OrderRequest {
+    OrderSide side;
+    float price;
+    size_t volume;
+    Mpid trader_id;
+    Order::order_id_t order_id;
+
+    OrderRequest() = default;
+    OrderRequest(Order order): side{order.side}, price{CONFIG::PRICE_TICK_SIZE * order.price}, volume{order.volume}, trader_id{order.trader_id}, order_id{order.order_id} {}
+    OrderRequest(OrderSide side, float price, size_t volume, Mpid trader_id): side{side}, price{price}, volume{volume}, trader_id{trader_id}, order_id{0} {} 
+};
+
 inline std::ostream& operator<<(std::ostream& os, const Order& ord) {
     return os << ord.trader_id << ' ' << ord.side << ' ' << ord.price * CONFIG::PRICE_TICK_SIZE << ' ' << ord.volume << ' ' << ord.timestamp << ' ' << ord.order_id;
 }
@@ -82,9 +94,11 @@ struct MatchResult {
 };
 
 struct BookSnapshot {
-    std::vector<Order> bids{};
-    std::vector<Order> asks{};
+    std::vector<OrderRequest> bids{};
+    std::vector<OrderRequest> asks{};
     std::string time{};
 };
+
+
 
 #endif //TYPES_H

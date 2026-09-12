@@ -10,10 +10,10 @@
 #include <cmath>
 
 namespace {
-    using price_t = decltype(OrderGateway::OrderRequest::price);
-    using volume_t = decltype(OrderGateway::OrderRequest::volume);
-    using side_t = decltype(OrderGateway::OrderRequest::side);
-    using mpid_t = decltype(OrderGateway::OrderRequest::trader_id);
+    using price_t = decltype(OrderRequest::price);
+    using volume_t = decltype(OrderRequest::volume);
+    using side_t = decltype(OrderRequest::side);
+    using mpid_t = decltype(OrderRequest::trader_id);
 
     std::array<mpid_t, 8> MP_IDENTIFIERS = {
         "CDEL",
@@ -32,7 +32,7 @@ namespace {
 class OrderGenerator {
 public:
     explicit OrderGenerator(const int seed);
-    OrderGateway::OrderRequest generate_order();
+    OrderRequest generate_order();
 private:  
 
     std::mt19937 gen;

@@ -9,20 +9,21 @@ def _f32(x: float) -> float:
     return struct.unpack("f", struct.pack("f", x))[0]
 
 
-# Mirrors CONFIG::PRICE_TICK_SIZE as the engine sees it: a 32-bit float.
-# Prices must be constructed in 32-bit arithmetic (ticks * TICK) or the
-# gateway's tick-size validation can reject them for being one ULP off.
-TICK = _f32(0.1)
-
-MIN_TICKS = 1                    # CONFIG::MIN_PRICE / tick size
-MAX_TICKS = round(1e5 / TICK)    # CONFIG::MAX_PRICE / tick size
-MIN_VOLUME = 1                   # CONFIG::MIN_VOLUME
-MAX_VOLUME = 100000              # CONFIG::MAX_VOLUME
+# Mirrors CONFIG as the engine sees it: 32-bit floats. Prices must be
+# constructed in 32-bit arithmetic (ticks * TICK) or the gateway's
+# tick-size validation can reject them for being one ULP off.
+TICK = lob.PRICE_TICK_SIZE
+MIN_TICKS = round(lob.MIN_PRICE / TICK)
+MAX_TICKS = round(lob.MAX_PRICE / TICK)
 
 
 class OrderGenerator:
     def __init__(self, seed: int = 47):
         self.random = random.Random(seed)
+        self._orders = iter(self)
+
+    def generate_order(self) -> lob.OrderRequest:
+        return next(self._orders)
 
     def __iter__(self) -> lob.OrderRequest:
         POSSIBLE_TRADER_IDS: list[str] = [
@@ -61,6 +62,9 @@ class OrderGenerator:
 
             yield order_request
 
+
+    
+
     @staticmethod
     def _clamp_rounded(x: int, lo: float, hi: float) -> int:
         return max(round(lo), min(round(hi), x))
@@ -74,5 +78,5 @@ class OrderGenerator:
     def _generate_volume(self, mean: int, sd: float) -> int:
         while True:
             volume = round(self.random.gauss(mean, sd))
-            if MIN_VOLUME <= volume <= MAX_VOLUME:
+            if lob.MIN_VOLUME <= volume <= lob.MAX_VOLUME:
                 return volume

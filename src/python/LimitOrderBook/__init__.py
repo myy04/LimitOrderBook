@@ -7,5 +7,10 @@ __all__ = [
     "Trade",
     "SelfTradeCancellation",
     "MatchResult",
-    "BookSnapshot"   
+    "BookSnapshot",   
+    "MIN_PRICE",
+    "MAX_PRICE",
+    "MIN_VOLUME",
+    "MAX_VOLUME",
+    "PRICE_TICK_SIZE"
 ]

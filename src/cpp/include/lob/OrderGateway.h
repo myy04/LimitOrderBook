@@ -11,19 +11,12 @@
 
 class OrderGateway {
 public:
-    struct OrderRequest {
-        OrderSide side;
-        float price;
-        size_t volume;
-        Mpid trader_id;
-    };
-
     explicit OrderGateway(): engine{} {}
 
     MatchResult submit_order(OrderRequest order);
     static bool is_order_valid(OrderRequest req);
 
-    const Order& get_order(Order::order_id_t);
+    const OrderRequest get_order(Order::order_id_t);
 
     void reset();
 
@@ -33,7 +26,7 @@ private:
     Order create_order(const OrderRequest& order_request);
     MatchingEngine engine;
 
-    static Order::price_t convert_price(decltype(OrderGateway::OrderRequest::price));
+    static Order::price_t convert_price(decltype(OrderRequest::price));
 
     size_t order_counter = 0; 
 };

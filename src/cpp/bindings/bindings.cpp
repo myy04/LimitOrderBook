@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> 
+#include <sstream> 
 
 #include "../include/lob/Types.h"
 #include "../include/lob/OrderBook.h"
@@ -18,7 +19,13 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def(py::init<const char*>(),
             py::arg("tag")
         )
+        .def("__repr__", [](const Mpid& trader_id){
+            std::ostringstream oss;
+            oss << trader_id;
+            return oss.str();
+        }) 
         .def_readwrite("tag", &Mpid::tag);
+
 
     py::class_<Order>(m, "Order")
         .def(py::init<int, int, int, int, Mpid, OrderSide>(), 
@@ -59,6 +66,20 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def_readwrite("resting_order_id", &SelfTradeCancellation::resting_order_id)
         .def_readwrite("price", &SelfTradeCancellation::price)
         .def_readwrite("volume", &SelfTradeCancellation::volume);
+        
+    py::class_<OrderRequest>(m, "OrderRequest")
+        .def(py::init<>())
+        .def(py::init<OrderSide, float, size_t, Mpid>(),
+            py::arg("side"),
+            py::arg("price"),
+            py::arg("volume"),
+            py::arg("trader_id")
+        )
+        .def_readwrite("side",      &OrderRequest::side)
+        .def_readwrite("price",     &OrderRequest::price)
+        .def_readwrite("volume",    &OrderRequest::volume)
+        .def_readwrite("trader_id", &OrderRequest::trader_id)
+        .def_readwrite("order_id",  &OrderRequest::order_id);
 
     py::class_<MatchResult>(m, "MatchResult")
         .def(py::init<std::vector<Trade>, std::vector<SelfTradeCancellation>>(),
@@ -69,7 +90,7 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def_readwrite("cancellations", &MatchResult::cancellations);
 
     py::class_<BookSnapshot>(m, "BookSnapshot")
-        .def(py::init<std::vector<Order>, std::vector<Order>, std::string>(),
+        .def(py::init<std::vector<OrderRequest>, std::vector<OrderRequest>, std::string>(),
             py::arg("bids"),
             py::arg("asks"),
             py::arg("time")
@@ -87,19 +108,30 @@ PYBIND11_MODULE(LimitOrderBook_cpp, m) {
         .def("reset", &OrderGateway::reset)          
         .def("pull_snapshot", &OrderGateway::pull_snapshot);        
 
-    py::class_<OrderGateway::OrderRequest>(m, "OrderRequest")
-        .def(py::init<>())
-        .def(py::init<OrderSide, float, size_t, Mpid>(),
-            py::arg("side"),
-            py::arg("price"),
-            py::arg("volume"),
-            py::arg("trader_id")
-        )
-        .def_readwrite("side",      &OrderGateway::OrderRequest::side)
-        .def_readwrite("price",     &OrderGateway::OrderRequest::price)
-        .def_readwrite("volume",    &OrderGateway::OrderRequest::volume)
-        .def_readwrite("trader_id", &OrderGateway::OrderRequest::trader_id);
+    m.attr("MIN_PRICE") = py::cast(
+        &CONFIG::MIN_PRICE,
+        py::return_value_policy::reference
+    );
 
+    m.attr("MAX_PRICE") = py::cast(
+        &CONFIG::MAX_PRICE,
+        py::return_value_policy::reference
+    );
+
+    m.attr("MIN_VOLUME") = py::cast(
+        &CONFIG::MIN_VOLUME,
+        py::return_value_policy::reference
+    );
+
+    m.attr("MAX_VOLUME") = py::cast(
+        &CONFIG::MAX_VOLUME,
+        py::return_value_policy::reference
+    );
+
+    m.attr("PRICE_TICK_SIZE") = py::cast(
+        &CONFIG::PRICE_TICK_SIZE,
+        py::return_value_policy::reference
+    );
 };
 
 
